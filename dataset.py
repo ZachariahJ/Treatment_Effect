@@ -10,7 +10,7 @@ UNIQUE_ID = "UNIQUEID"
 ORDER_BY = "RAW_ID"
 THERAPY_COL = "THERAPY"
 HAMDS_COL = [f"HAMD{i:02d}" for i in range(1, 18)]
-NUM_COLS = ["AGE"]
+NUM_COLS = ["AGE"] + HAMDS_COL
 CAT_COLS = ["PROTOCOL", "ORIGIN", "GENDER", "GEOCODE"]
 
 
@@ -20,8 +20,8 @@ class Dataset:
     val_loader:   DataLoader
     test_loader:  DataLoader
     K:         int
-    cat_dim:   int
     num_dim:   int
+    cat_dim:   list
     params:    dict
     inverse_therapy_map: dict[int, str]
 
@@ -37,7 +37,6 @@ def data_preprocessing( csv_path: str = "data_generated.csv",
     # Calc next_visit_outcome for EACH PATIENT
     df = df.sort_values([UNIQUE_ID, ORDER_BY]).reset_index(drop=True)
     df["HAMD_total"] = df[HAMDS_COL].sum(axis=1).astype("float32")
-    num_features = NUM_COLS + HAMDS_COL + ["HAMD_total"]
 
     df["y"] = df.groupby(UNIQUE_ID)["HAMD_total"].shift(-1)
     df = df.dropna(subset=["y"]).reset_index(drop=True) # Drop last visit
@@ -71,14 +70,14 @@ def data_preprocessing( csv_path: str = "data_generated.csv",
     def fit_preprocessor(train_df):
         return {
             # Numerical Features
-            "mean": train_df[num_features].mean(),
-            "std": train_df[num_features].std().replace(0, 1), # Avoid division by zero
+            "mean": train_df[NUM_COLS].mean(),
+            "std": train_df[NUM_COLS].std().replace(0, 1), # Avoid division by zero
             "cat_maps": {c: {v: i + 1 for i, v in enumerate(train_df[c].dropna().unique())} for c in CAT_COLS}, # '0' UNKNOWN
             "therapy_map": {v: i for i, v in enumerate(sorted(train_df[THERAPY_COL].unique()))}
         }
 
     def transform(d, p):
-        num = ((d[num_features] - p["mean"]) / p["std"]).fillna(0).astype("float32").values
+        num = ((d[NUM_COLS] - p["mean"]) / p["std"]).fillna(0).astype("float32").values
         cat = np.stack([d[c].map(p["cat_maps"][c]).fillna(0).astype("int64").values for c in CAT_COLS], axis=1)
         t   = d[THERAPY_COL].map(p["therapy_map"]).fillna(0).astype("int64").values
         y   = d["y"].values.astype("float32")
@@ -105,8 +104,8 @@ def data_preprocessing( csv_path: str = "data_generated.csv",
         val_loader = make_dl(val_idx, shuffle=False),
         test_loader = make_dl(test_idx, shuffle=False),
         K = len(params["therapy_map"]),
-        num_dim = len(num_features),
-        cat_dim = len(params["cat_maps"]), # +1 for unknown category (0)
+        num_dim = len(NUM_COLS),
+        cat_dim = [len(params["cat_maps"][c]) + 1 for c in CAT_COLS], # +1 for unknown category (0)
         inverse_therapy_map = params["inverse_therapy_map"],
         params = params
     )
