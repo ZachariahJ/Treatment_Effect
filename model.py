@@ -2,13 +2,15 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 from dataset import data_preprocessing
 from config import (NOISE_STD, DROP_P, LAMBDA_STAB, LAMBDA_MMD, LAMBDA_AC, LEARNING_RATE, WEIGHT_DECAY)
 
 # Dimensions
 CAT_EMB_DIM  = 8
 THER_EMB_DIM = 16
-S_DIM, C_DIM = 32,32
+S_DIM, C_DIM = 32, 32
+
 
 class InputProcessing(nn.Module):
     """
@@ -97,12 +99,6 @@ class ITEHead(nn.Module):
 
     def forward(self, S, C):
         return self.net(torch.cat([S, C], dim=1))      # (B, K)
-    
-
-
-
-
-
 
 
 def augment(x, noise_std=NOISE_STD, drop_p=DROP_P):
@@ -135,3 +131,111 @@ def anti_collapse(z, gamma=1.0, eps=1e-4):
 
     return var_loss + cov_loss
 
+
+def MMD(C, t, K):
+    """
+    Average MMD of each treatment group's C vs the rest. 
+    C:(B,d) t:(B,) -> scalar
+    """
+    def rbf_mmd2(a, b, sigma=1.0):
+        """RBF-kernel MMD^2: a:(n,d) b:(m,d) -> scalar"""
+        def k(x, y):
+            return torch.exp(-torch.cdist(x, y) ** 2 / (2 * sigma ** 2))
+        return k(a, a).mean() + k(b, b).mean() - 2 * k(a, b).mean()
+
+    total = C.new_zeros(())
+    count = 0
+    for k in range(K):
+        mask = (t == k)
+        if mask.sum() < 2 or (~mask).sum() < 2:
+            continue
+        total = total + rbf_mmd2(C[mask], C[~mask])
+        count += 1
+    return total / max(count, 1)
+
+#################################
+#################################
+#################################
+#################################
+
+# TODO: UNDERSTAND THIS FUNCTION BETTER
+@torch.no_grad()
+def dr_pseudo_targets(S, C, t, y, outcome, propensity, K, t0, eps=0.05):
+    """Doubly-robust pseudo-targets (B,K): each treatment's effect relative to baseline t0.
+    Computed with the frozen outcome/propensity models."""
+    # propensity: prob of receiving each treatment per sample (B,K);
+    # clamp avoids dividing by tiny values (propensity clipping)
+    e = torch.softmax(propensity(C), dim=1).clamp(min=eps)
+    # predicted outcome under each treatment, mu: (B,K)
+    mu = torch.stack([outcome(S, C, torch.full_like(t, k)).squeeze(1) for k in range(K)], dim=1)
+    onehot = F.one_hot(t, K).float()                   # (B,K) treatment actually received
+    y_col  = y.view(-1, 1)                              # (B,1)
+    # doubly-robust pseudo-outcome (B,K): model prediction + IPW correction
+    # only on the received-treatment column
+    Y_dr = mu + onehot / e * (y_col - mu)
+    # effect relative to baseline t0 (the baseline column naturally becomes 0)
+    return Y_dr - Y_dr[:, t0:t0 + 1]
+
+
+
+# ============================================================================
+#  Diffusion definitions (modules 5-6)
+# ============================================================================
+
+STEP_EMB_DIM = 32     # diffusion-step embedding dim
+T_STEPS      = 100    # number of diffusion steps
+
+
+def make_schedule(T=T_STEPS):
+    """
+    Linear noise schedule. 
+    Returns (betas, alphas, alpha_bars).
+    """
+    betas = torch.linspace(1e-4, 0.02, T)       # Linear Noise Schedule
+    alphas = 1.0 - betas
+    alpha_bars = torch.cumprod(alphas, dim=0)   # cumulative product
+    return betas, alphas, alpha_bars
+
+
+class Denoiser(nn.Module):
+    """
+    eps_theta(C_t, step, S, t): given the noised C, the step index, and conditions (S, treatment), predict the noise that was added. 
+    Output has the same shape as C.
+    """
+    def __init__(self, K: int, T: int = T_STEPS):
+        super().__init__()
+        self.step_emb = nn.Embedding(T, STEP_EMB_DIM)   # step index -> vector[32]
+        self.t_emb    = nn.Embedding(K, THER_EMB_DIM)   # treatment -> vector[16]
+        din = C_DIM + STEP_EMB_DIM + S_DIM + THER_EMB_DIM
+        self.net = nn.Sequential(
+            nn.Linear(din, 128), nn.ReLU(),
+            nn.Linear(128, 128), nn.ReLU(),
+            nn.Linear(128, 128), nn.ReLU(),
+            nn.Linear(128, C_DIM),  # predicted noise
+        )
+
+    def forward(self, C_t, step, S, t):
+        h = torch.cat([C_t, self.step_emb(step), S, self.t_emb(t)], dim=1)
+        return self.net(h)
+
+
+@torch.no_grad()
+def sample_C(denoiser, S, t, schedule):
+    """
+    S: (B,S_DIM), t: (B,) -> C_cf: (B,C_DIM).
+    Reverse diffusion (DDPM ancestral sampling): 
+    generate a counterfactual C from pure noise,
+    conditioned on (S, treatment t). 
+    """
+    betas, alphas, alpha_bars = schedule
+    T = len(betas)
+    C_cf = torch.randn(S.shape[0], C_DIM)                    # start from pure noise (x_T)
+    for step in reversed(range(T)):
+        step_b = torch.full((S.shape[0],), step, dtype=torch.long)
+        eps = denoiser(C_cf, step_b, S, t)                  # predicted noise at this step
+        a, ab = alphas[step], alpha_bars[step]
+        # posterior mean: 1/sqrt(a) * (C - (1-a)/sqrt(1-ab) * eps)
+        C_cf = (C_cf - (1 - a) / torch.sqrt(1 - ab) * eps) / torch.sqrt(a)
+        if step > 0:                                     # add noise except at the last step
+            C_cf = C_cf + torch.sqrt(betas[step]) * torch.randn_like(C_cf)
+    return C_cf
