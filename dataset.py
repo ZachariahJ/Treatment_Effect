@@ -112,3 +112,12 @@ def data_preprocessing( csv_path: str = "data_generated.csv",
 
 if __name__ == "__main__":
     df = data_preprocessing()
+    # Print Dataset Summary
+    print(f"### DATASET SUMMARY ###")
+    print(f"Numerical Feature Dimension: {df.num_dim}")
+    print(f"Categorical Feature Dimensions: {df.cat_dim}")
+    # print the inverse therapy map in separate lines for better readability
+    print(f"Number of Therapies (K): {df.K}")
+    print(f"Therapy Map:")
+    for k, v in df.inverse_therapy_map.items():
+        print(f"  {k}: {v}")
