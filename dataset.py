@@ -43,7 +43,7 @@ def data_preprocessing( csv_path: str = "data_generated.csv",
 
     # Get unique_ids and shuffle
     rng = np.random.default_rng(seed)
-    unique_ids = df[UNIQUE_ID].unique().copy(); rng.shuffle(unique_ids)
+    unique_ids = rng.permutation(df[UNIQUE_ID].unique())
 
     # Split Dataset by patient
     n_unique_ids = len(unique_ids)
@@ -91,10 +91,10 @@ def data_preprocessing( csv_path: str = "data_generated.csv",
     params["inverse_therapy_map"] = {i: v for v, i in params["therapy_map"].items()}
 
     # Conv to Tensors
-    full = TensorDataset(torch.from_numpy(num), 
-                         torch.from_numpy(cat),
-                         torch.from_numpy(t), 
-                         torch.from_numpy(y).view(-1, 1))
+    full = TensorDataset(torch.from_numpy(num.copy()),
+                         torch.from_numpy(cat.copy()),
+                         torch.from_numpy(t.copy()),
+                         torch.from_numpy(y.copy()).view(-1, 1))
 
     def make_dl(idx, shuffle):
         return DataLoader(Subset(full, idx), batch_size=batch_size, shuffle=shuffle)
