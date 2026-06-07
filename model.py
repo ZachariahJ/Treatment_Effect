@@ -228,14 +228,16 @@ def sample_C(denoiser, S, t, schedule):
     conditioned on (S, treatment t). 
     """
     betas, alphas, alpha_bars = schedule
-    T = len(betas)
-    C_cf = torch.randn(S.shape[0], C_DIM)                    # start from pure noise (x_T)
+    T = len(betas)                                          # number of diffusion steps
+    B = S.shape[0]                                          # batch size
+    C_cf = torch.randn(B, C_DIM)                            # start from pure noise (x_T)
     for step in reversed(range(T)):
-        step_b = torch.full((S.shape[0],), step, dtype=torch.long)
+        step_b = torch.full((B,), step, dtype=torch.long)   # current step index
         eps = denoiser(C_cf, step_b, S, t)                  # predicted noise at this step
         a, ab = alphas[step], alpha_bars[step]
-        # posterior mean: 1/sqrt(a) * (C - (1-a)/sqrt(1-ab) * eps)
+        # posterior mean: 1/sqrt(a) * (C - (1-a)/sqrt(1-ab) * eps) - DDPM eqn
         C_cf = (C_cf - (1 - a) / torch.sqrt(1 - ab) * eps) / torch.sqrt(a)
-        if step > 0:                                     # add noise except at the last step
-            C_cf = C_cf + torch.sqrt(betas[step]) * torch.randn_like(C_cf)
+
+        if step > 0:                                        # add noise except at the last step
+            C_cf = C_cf + torch.sqrt(betas[step]) * torch.randn_like(C_cf)  # ancestral sampling
     return C_cf
