@@ -1,6 +1,7 @@
 import os
 import torch
 import torch.nn as nn
+from copy import deepcopy
 
 from config import (EPOCHS, LEARNING_RATE, PATIENCE, SEED, WEIGHT_DECAY, LAMBDA_STAB, LAMBDA_MMD, LAMBDA_AC)
 from dataset import Dataset, data_preprocessing
@@ -9,8 +10,25 @@ from model import (InputProcessing, Encoder, PropensityHead, OutcomeModel, ITEHe
                    augment, MMD, anti_collapse, dr_pseudo_targets)
 
 
+class EarlyStopping:
+    def __init__(self, patience):
+        self.patience, self.best, self.counter, self.best_state = patience, float("inf"), 0, None
+
+    def step(self, metric, modules: dict) -> bool:
+        if metric < self.best:
+            self.best, self.counter = metric, 0
+            self.best_state = {k: deepcopy(m.state_dict()) for k, m in modules.items()}
+            return False
+        self.counter += 1
+        return self.counter >= self.patience
+
+    def restore(self, modules: dict):
+        for k, m in modules.items():
+            m.load_state_dict(self.best_state[k])   # type: ignore
+
+
 @torch.no_grad()
-def evaluate(inp: InputProcessing, 
+def evaluate_representation(inp: InputProcessing, 
              enc: Encoder, 
              prop: PropensityHead, 
              loader: torch.utils.data.DataLoader
@@ -46,8 +64,9 @@ def train_representation(data: Dataset, epochs=EPOCHS):
     opt = torch.optim.Adam([p for m in parts for p in m.parameters()],
                            lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
     mse, ce = nn.MSELoss(), nn.CrossEntropyLoss()
-
-    best_val_ce, patience_counter = float("inf"), 0         # For early stopping
+    
+    es = EarlyStopping(PATIENCE)
+    mods = {"inp": inp, "enc": enc, "prop": prop}
 
     for epoch in range(epochs):
         for m in parts: m.train()                           # Set to train mode
@@ -97,37 +116,20 @@ def train_representation(data: Dataset, epochs=EPOCHS):
 
         # average losses for train/val
         avg = {k: v / n_batches for k, v in running.items()}
-        val_ce, val_acc = evaluate(inp, enc, prop, data.val_loader)
+        val_ce, val_acc = evaluate_representation(inp, enc, prop, data.val_loader)
 
         print(f"[Representation Learning] epoch {epoch:2d} | CE {val_ce:.3f} | acc {val_acc:.3f} "
               f"| stab {avg['stab']:.3f} | prop {avg['prop']:.3f} | mmd {avg['mmd']:.4f}") # type: ignore
         
-        # Early Stopping based on Val Loss
-        if val_ce < best_val_ce:
-            best_val_ce = val_ce
-            patience_counter = 0
-            # Save best model state
-            torch.save({
-                'inp_state_dict': inp.state_dict(),
-                'enc_state_dict': enc.state_dict(),
-                'prop_state_dict': prop.state_dict(),
-            }, "best_representation.pt")
-        else:
-            patience_counter += 1
-            if patience_counter >= PATIENCE:
-                print(f"Early stopping at epoch {epoch}.")
-                break
+        if es.step(val_ce, mods):  # Early stopping on val CE
+            print(f"Early stopping triggered at epoch {epoch:2d}")
+            break
 
-    # Load best model state before returning
-    ckpt = torch.load("best_representation.pt")
-    inp.load_state_dict(ckpt['inp_state_dict'])
-    enc.load_state_dict(ckpt['enc_state_dict'])
-    prop.load_state_dict(ckpt['prop_state_dict'])
-
-    return inp, enc, prop
+    es.restore(mods)
+    return mods["inp"], mods["enc"], mods["prop"]
 
 @torch.no_grad()
-def evaluate(inp, enc, out, loader):
+def evaluate_outcome(inp, enc, out, loader):
     """Evaluate the outcome prediction RMSE on the val/test set."""
     for m in [inp, enc, out]: m.eval()                 # Set to eval mode
     mse_fn = nn.MSELoss(reduction="sum")
@@ -155,7 +157,7 @@ def train_outcome(data: Dataset, inp: InputProcessing, enc: Encoder, prop: Prope
             y_pred = out(S, C, t)
             loss = mse(y_pred, y)
             opt.zero_grad(); loss.backward(); opt.step()
-        val_rmse, val_acc = evaluate(inp, enc, out, data.val_loader) # Evaluate
+        val_rmse, val_acc = evaluate_outcome(inp, enc, out, data.val_loader) # Evaluate
         print(f"[Outcome Model] epoch {epoch:2d} | RMSE {val_rmse:.3f} | acc {val_acc:.3f} "
               f"| MSE Loss {loss.item():.3f}") # type: ignore
 
@@ -174,7 +176,7 @@ def main():
     inp, enc, prop = train_representation(data)
 
     # Test the representation learning performance on the test set
-    test_ce, test_acc = evaluate(inp, enc, prop, data.test_loader)
+    test_ce, test_acc = evaluate_representation(inp, enc, prop, data.test_loader)
     print(f"Final Test CE: {test_ce:.3f} | Test Accuracy: {test_acc:.3f}")
 
     for p in enc.parameters(): p.requires_grad = False      # Freeze Encoder

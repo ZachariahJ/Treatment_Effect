@@ -57,9 +57,9 @@ def data_preprocessing( csv_path: str = "data_generated.csv",
 
     # Get indices for train, val, and test splits
     u = df[UNIQUE_ID].values
-    train_idx = np.where(np.isin(u, train_ids))[0]
-    val_idx   = np.where(np.isin(u, val_ids))[0]
-    test_idx  = np.where(np.isin(u, test_ids))[0]
+    train_idx = np.where(np.isin(u, train_ids))[0]  # type: ignore
+    val_idx   = np.where(np.isin(u, val_ids))[0]    # type: ignore
+    test_idx  = np.where(np.isin(u, test_ids))[0]   # type: ignore
     
     print(f"### SPLIT DONE ###")
     print(f"Total Patients: {n_unique_ids}")
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     print(f"Number of Therapies (K): {df.K}")
 
     # print count for each therapy total in the dataset
-    therapy_counts = pd.Series(df.train_loader.dataset.dataset.tensors[2].numpy()).value_counts()
+    therapy_counts = pd.Series(df.train_loader.dataset.dataset.tensors[2].numpy()).value_counts() # type: ignore
     print(f"Therapy Mapping and Counts:")
     for k, v in zip(df.inverse_therapy_map.items(), therapy_counts.items()):
         print(f"  {k[0]}: {k[1]} - {v[1]}")
