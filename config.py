@@ -21,7 +21,7 @@ NOISE_STD   = 0.1    # Gaussian noise strength
 DROP_P      = 0.1    # Feature dropout
 
 # Model Save Path
-MODEL_SAVE_PATH = "model.pt"
+MODEL_SAVE_PATH = "models/"
 
 # Optimizer Hyperparameters
 LEARNING_RATE   = 1e-3

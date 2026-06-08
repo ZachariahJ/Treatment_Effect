@@ -118,6 +118,10 @@ if __name__ == "__main__":
     print(f"Categorical Feature Dimensions: {df.cat_dim}")
     # print the inverse therapy map in separate lines for better readability
     print(f"Number of Therapies (K): {df.K}")
-    print(f"Therapy Map:")
-    for k, v in df.inverse_therapy_map.items():
-        print(f"  {k}: {v}")
+
+    # print count for each therapy total in the dataset
+    therapy_counts = pd.Series(df.train_loader.dataset.dataset.tensors[2].numpy()).value_counts()
+    print(f"Therapy Mapping and Counts:")
+    for k, v in zip(df.inverse_therapy_map.items(), therapy_counts.items()):
+        print(f"  {k[0]}: {k[1]} - {v[1]}")
+    
