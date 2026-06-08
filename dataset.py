@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, Subset, TensorDataset
-from config import SEED, TRAIN_SPLIT, VAL_SPLIT
+from config import BATCH_SIZE, SEED, TRAIN_SPLIT, VAL_SPLIT
 
 UNIQUE_ID = "UNIQUEID"
 ORDER_BY = "RAW_ID"
@@ -29,7 +29,7 @@ def data_preprocessing( csv_path: str = "data_generated.csv",
                         seed: int = SEED,
                         train_split: float = TRAIN_SPLIT,
                         val_split: float = VAL_SPLIT,
-                        batch_size: int = 32
+                        batch_size: int = BATCH_SIZE
                         ) -> Dataset:
     # Read file as Data Frame
     df: pd.DataFrame = pd.read_csv(csv_path)

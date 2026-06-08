@@ -10,7 +10,8 @@ from config import (NOISE_STD, DROP_P, LAMBDA_STAB, LAMBDA_MMD, LAMBDA_AC, LEARN
 CAT_EMB_DIM  = 8
 THER_EMB_DIM = 16
 S_DIM, C_DIM = 32, 32
-
+STEP_EMB_DIM = 32     # diffusion-step embedding dim
+T_STEPS      = 100    # number of diffusion steps
 
 class InputProcessing(nn.Module):
     """
@@ -111,25 +112,28 @@ def augment(x, noise_std=NOISE_STD, drop_p=DROP_P):
     return (x + gauss) * mask
 
 
-def anti_collapse(z, gamma=1.0, eps=1e-4):
+def anti_collapse(z1, z2, gamma=1.0, eps=1e-4):
     """
-    z:(B,d) -> var_loss + cov_loss
+    z1:(B,d), z2:(B,d) -> average(var_loss + cov_loss)
     Loss Term for Anti-Collapse:
     Decorrelation & Variance Control
     """
-    zc  = z - z.mean(dim=0)
-    cov = (zc.T @ zc) / (z.shape[0] - 1)        # Matrix (d,d)
+    def ac(z):
+        # Centered representations
+        zc  = z - z.mean(dim=0)
+        cov = (zc.T @ zc) / (z.shape[0] - 1)        # Matrix (d,d)
 
-    # Variance
-    diag = torch.diagonal(cov) 
-    std  = torch.sqrt(diag + eps)
-    var_loss = torch.relu(gamma - std).mean()
+        # Variance
+        diag = torch.diagonal(cov) 
+        std  = torch.sqrt(diag + eps)
+        var_loss = torch.relu(gamma - std).mean()
 
-    # Covariance
-    off = cov - torch.diag(diag)
-    cov_loss = (off ** 2).sum() / z.shape[1]
+        # Covariance
+        off = cov - torch.diag(diag)
+        cov_loss = (off ** 2).sum() / z.shape[1]
 
-    return var_loss + cov_loss
+        return var_loss + cov_loss
+    return (ac(z1) + ac(z2)) / 2
 
 
 def MMD(C, t, K):
@@ -175,15 +179,6 @@ def dr_pseudo_targets(S, C, t, y, outcome, propensity, K, t0, eps=0.05):
     Y_dr = mu + onehot / e * (y_col - mu)
     # effect relative to baseline t0 (the baseline column naturally becomes 0)
     return Y_dr - Y_dr[:, t0:t0 + 1]
-
-
-
-# ============================================================================
-#  Diffusion definitions (modules 5-6)
-# ============================================================================
-
-STEP_EMB_DIM = 32     # diffusion-step embedding dim
-T_STEPS      = 100    # number of diffusion steps
 
 
 def make_schedule(T=T_STEPS):
