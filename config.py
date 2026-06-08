@@ -1,4 +1,3 @@
-
 # Loss Weights
 LAMBDA_STAB = 1.0
 LAMBDA_MMD = 1.0
@@ -26,3 +25,13 @@ MODEL_SAVE_PATH = "models/"
 # Optimizer Hyperparameters
 LEARNING_RATE   = 1e-3
 WEIGHT_DECAY    = 1e-5
+
+def set_seed(seed=SEED):
+    """Set random seed for reproducibility"""
+    import random
+    import torch
+    import numpy as np
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)

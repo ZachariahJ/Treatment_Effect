@@ -3,12 +3,14 @@ import torch
 import torch.nn as nn
 from copy import deepcopy
 
-from config import (EPOCHS, LEARNING_RATE, PATIENCE, SEED, WEIGHT_DECAY, LAMBDA_STAB, LAMBDA_MMD, LAMBDA_AC)
+from config import (set_seed, EPOCHS, LEARNING_RATE, PATIENCE, WEIGHT_DECAY, LAMBDA_STAB, LAMBDA_MMD, LAMBDA_AC)
 from dataset import Dataset, data_preprocessing
 from model import (InputProcessing, Encoder, PropensityHead, OutcomeModel, ITEHead,
                    Denoiser, make_schedule, sample_C,
                    augment, MMD, anti_collapse, dr_pseudo_targets)
 
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cpu")
 
 class EarlyStopping:
     def __init__(self, patience):
@@ -28,16 +30,13 @@ class EarlyStopping:
 
 
 @torch.no_grad()
-def evaluate_representation(inp: InputProcessing, 
-             enc: Encoder, 
-             prop: PropensityHead, 
-             loader: torch.utils.data.DataLoader
-             ) -> tuple[float, float]: 
+def evaluate_representation(inp, enc, prop, loader) -> tuple[float, float]: 
     """Evaluate the model performance on the val/test set."""
     for m in [inp, enc, prop]: m.eval()                 # Set to eval mode
     ce_fn = nn.CrossEntropyLoss(reduction="sum")
     n, correct, ce_sum = 0, 0, 0.0
     for num, cat, t, _ in loader:
+        num, cat, t = num.to(device), cat.to(device), t.to(device)
         x = inp(num, cat)
         _, C = enc(x)                               # Enchode C, no aug
         logits = prop(C)                            # predict logits
@@ -49,11 +48,8 @@ def evaluate_representation(inp: InputProcessing,
 
 def train_representation(data: Dataset, epochs=EPOCHS):
     """Train the representation (Encoder + PropensityHead) with stability/MMD/anti-collapse losses."""
-    # Set random seed and device
-    torch.manual_seed(SEED)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Model Initialization & to GPU if available
+    # Model Initialization
     K = data.K      # number of treatments
     inp  = InputProcessing(data.num_dim, data.cat_dim).to(device)
     enc  = Encoder(inp.din).to(device)
@@ -73,6 +69,7 @@ def train_representation(data: Dataset, epochs=EPOCHS):
         running = {"stab": 0.0, "prop": 0.0, "mmd": 0.0}    # cumulative losses for logging
         n_batches = 0
         for num, cat, t, _ in data.train_loader:
+            num, cat, t = num.to(device), cat.to(device), t.to(device)
             x = inp(num, cat)                               # Input vector (B, din)
 
             # two augmented views of same input
@@ -119,7 +116,7 @@ def train_representation(data: Dataset, epochs=EPOCHS):
         val_ce, val_acc = evaluate_representation(inp, enc, prop, data.val_loader)
 
         print(f"[Representation Learning] epoch {epoch:2d} | CE {val_ce:.3f} | acc {val_acc:.3f} "
-              f"| stab {avg['stab']:.3f} | prop {avg['prop']:.3f} | mmd {avg['mmd']:.4f}") # type: ignore
+              f"| stab {avg['stab']:.3f} | prop {avg['prop']:.3f} | MMD {avg['mmd']:.4f}") # type: ignore
         
         if es.step(val_ce, mods):  # Early stopping on val CE
             print(f"Early stopping triggered at epoch {epoch:2d}")
@@ -131,61 +128,80 @@ def train_representation(data: Dataset, epochs=EPOCHS):
 @torch.no_grad()
 def evaluate_outcome(inp, enc, out, loader):
     """Evaluate the outcome prediction RMSE on the val/test set."""
-    for m in [inp, enc, out]: m.eval()                 # Set to eval mode
-    mse_fn = nn.MSELoss(reduction="sum")
+    for m in [inp, enc, out]: m.eval()      # Set to eval mode
+    mse = nn.MSELoss(reduction="sum")
     n, mse_sum = 0, 0.0
     for num, cat, t, y in loader:
-        x = inp(num, cat)
-        S, C = enc(x)                               # Enchode C, no aug
-        y_pred = out(S, C, t)
-        mse_sum += mse_fn(y_pred, y).item()
+        S, C = enc(inp(num, cat))           # Enchode C, no aug
+        y_pred = out(S, C, t)               # predict outcome
+        mse_sum += mse(y, y_pred).item()    # Accumulate MSE
         n += y.shape[0]
-    return mse_sum / n, 0.0  # Placeholder for accuracy
+    return mse_sum / n                      # Return average MSE
 
-def train_outcome(data: Dataset, inp: InputProcessing, enc: Encoder, prop: PropensityHead, epochs=EPOCHS):
-    """Train the OutcomeModel"""
-    K = data.K
-    out = OutcomeModel(K)
+def train_outcome(data, inp, enc, epochs=EPOCHS):
+    """Train the outcome model."""
+    # Model Initialization
+    K = data.K      # number of treatments
+    out  = OutcomeModel(K).to(device)
+    parts = [inp, enc, out]
+
+    # Init Optimizer and Loss Functions
     opt = torch.optim.Adam(out.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
     mse = nn.MSELoss()
-    for epoch in range(epochs):
-        out.train()
-        for num, cat, t, y in data.train_loader:
-            with torch.no_grad():
-                x = inp(num, cat)
-                S, C = enc(x)
-            y_pred = out(S, C, t)
-            loss = mse(y_pred, y)
-            opt.zero_grad(); loss.backward(); opt.step()
-        val_rmse, val_acc = evaluate_outcome(inp, enc, out, data.val_loader) # Evaluate
-        print(f"[Outcome Model] epoch {epoch:2d} | RMSE {val_rmse:.3f} | acc {val_acc:.3f} "
-              f"| MSE Loss {loss.item():.3f}") # type: ignore
+    
+    es = EarlyStopping(PATIENCE)
+    mods = {"out": out}
 
-    return out
+    for epoch in range(epochs):
+        out.train(); MSE_sum, n_batches = 0.0, 0 # Set to train mode
+        for num, cat, t, y in data.train_loader:
+            num, cat, t, y = num.to(device), cat.to(device), t.to(device), y.to(device)
+            S, C = enc(inp(num, cat))
+
+            y_hat = out(S, C, t)
+            # Loss: Regression Loss
+            loss = mse(y, y_hat)
+            # Backpropagation
+            opt.zero_grad(); loss.backward(); opt.step()
+
+            # Loss sum
+            MSE_sum += loss.item()
+            n_batches += 1
+
+        # average losses for train/val
+        val_mse = evaluate_outcome(inp, enc, out, data.val_loader)
+
+        print(f"[Outcome Model] epoch {epoch:2d} | MSE {MSE_sum / n_batches:.4f}")
+        
+        if es.step(val_mse, mods):  # Early stopping on val MSE
+            print(f"Early stopping triggered at epoch {epoch:2d}")
+            break
+
+    es.restore(mods)
+    return mods["out"]
 
 
 def main():
 
-    # init model dir
+    # Init 
     os.makedirs("models", exist_ok=True)
-
-    # Preprocess datasheet, creates Train/Val/Test DataLoaders
+    set_seed()
     data = data_preprocessing()
 
     # First Stage: Train Encoder + PropensityHead
     inp, enc, prop = train_representation(data)
-
     # Test the representation learning performance on the test set
     test_ce, test_acc = evaluate_representation(inp, enc, prop, data.test_loader)
-    print(f"Final Test CE: {test_ce:.3f} | Test Accuracy: {test_acc:.3f}")
-
+    print(f"[Representation Learning] Final Test CE: {test_ce:.3f} | Test Accuracy: {test_acc:.3f}")
     for p in enc.parameters(): p.requires_grad = False      # Freeze Encoder
 
     # Second Stage: Train OutcomeModel
-    out = train_outcome(data, inp, enc, prop)
+    out = train_outcome(data, inp, enc)
+    test_mse = evaluate_outcome(inp, enc, out, data.test_loader)
+    print(f"[Outcome Model] Final Test MSE: {test_mse:.4f}")
 
     # Third Stage: Train ITEHead
-    ite = train_ITE(data, inp, enc, prop, out)
+    ITE_head = train_ITE(data, inp, enc, prop, out)
 
     # Forth Stage: Train Diffusion Model
 
