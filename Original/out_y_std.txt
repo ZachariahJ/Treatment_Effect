@@ -1,0 +1,281 @@
+### SPLIT DONE ###
+Total Patients: 836
+Train/Val/Test Patients: 585/167/84
+[Representation Learning] epoch  1 | CE 1.785 | acc 0.178 | stab 0.039 | prop 1.787 | MMD 0.2214
+[Representation Learning] epoch  2 | CE 1.786 | acc 0.206 | stab 0.008 | prop 1.785 | MMD 0.0752
+[Representation Learning] epoch  3 | CE 1.787 | acc 0.175 | stab 0.005 | prop 1.784 | MMD 0.0252
+[Representation Learning] epoch  4 | CE 1.785 | acc 0.174 | stab 0.005 | prop 1.784 | MMD 0.0122
+[Representation Learning] epoch  5 | CE 1.785 | acc 0.170 | stab 0.005 | prop 1.784 | MMD 0.0081
+[Representation Learning] epoch  6 | CE 1.785 | acc 0.175 | stab 0.005 | prop 1.783 | MMD 0.0069
+[Representation Learning] epoch  7 | CE 1.784 | acc 0.188 | stab 0.005 | prop 1.783 | MMD 0.0071
+[Representation Learning] epoch  8 | CE 1.785 | acc 0.178 | stab 0.005 | prop 1.782 | MMD 0.0069
+[Representation Learning] epoch  9 | CE 1.784 | acc 0.177 | stab 0.005 | prop 1.780 | MMD 0.0065
+[Representation Learning] epoch 10 | CE 1.784 | acc 0.183 | stab 0.005 | prop 1.781 | MMD 0.0076
+[Representation Learning] epoch 11 | CE 1.788 | acc 0.182 | stab 0.005 | prop 1.779 | MMD 0.0077
+[Representation Learning] epoch 12 | CE 1.779 | acc 0.182 | stab 0.005 | prop 1.777 | MMD 0.0086
+[Representation Learning] epoch 13 | CE 1.780 | acc 0.190 | stab 0.005 | prop 1.775 | MMD 0.0086
+[Representation Learning] epoch 14 | CE 1.786 | acc 0.187 | stab 0.005 | prop 1.769 | MMD 0.0104
+[Representation Learning] epoch 15 | CE 1.793 | acc 0.174 | stab 0.005 | prop 1.765 | MMD 0.0115
+[Representation Learning] epoch 16 | CE 1.783 | acc 0.195 | stab 0.005 | prop 1.761 | MMD 0.0129
+[Representation Learning] epoch 17 | CE 1.788 | acc 0.192 | stab 0.006 | prop 1.757 | MMD 0.0129
+[Representation Learning] epoch 18 | CE 1.790 | acc 0.177 | stab 0.006 | prop 1.748 | MMD 0.0124
+[Representation Learning] epoch 19 | CE 1.809 | acc 0.170 | stab 0.006 | prop 1.740 | MMD 0.0141
+[Representation Learning] epoch 20 | CE 1.802 | acc 0.203 | stab 0.006 | prop 1.729 | MMD 0.0144
+[Representation Learning] epoch 21 | CE 1.819 | acc 0.191 | stab 0.006 | prop 1.721 | MMD 0.0146
+[Representation Learning] epoch 22 | CE 1.815 | acc 0.190 | stab 0.006 | prop 1.710 | MMD 0.0149
+[Representation Learning] epoch 23 | CE 1.822 | acc 0.195 | stab 0.006 | prop 1.704 | MMD 0.0155
+[Representation Learning] epoch 24 | CE 1.828 | acc 0.190 | stab 0.006 | prop 1.693 | MMD 0.0165
+[Representation Learning] epoch 25 | CE 1.865 | acc 0.187 | stab 0.006 | prop 1.687 | MMD 0.0154
+[Representation Learning] epoch 26 | CE 1.835 | acc 0.204 | stab 0.006 | prop 1.680 | MMD 0.0167
+[Representation Learning] epoch 27 | CE 1.877 | acc 0.182 | stab 0.006 | prop 1.664 | MMD 0.0179
+Early stopping triggered at epoch 27
+[Outcome Model] epoch  1 | Train MSE 1.0618 | Val MSE 1.0805
+[Outcome Model] epoch  2 | Train MSE 1.0347 | Val MSE 1.0394
+[Outcome Model] epoch  3 | Train MSE 1.0131 | Val MSE 1.0460
+[Outcome Model] epoch  4 | Train MSE 1.0121 | Val MSE 1.0351
+[Outcome Model] epoch  5 | Train MSE 1.0083 | Val MSE 1.0276
+[Outcome Model] epoch  6 | Train MSE 1.0032 | Val MSE 1.0363
+[Outcome Model] epoch  7 | Train MSE 1.0037 | Val MSE 1.0484
+[Outcome Model] epoch  8 | Train MSE 1.0022 | Val MSE 1.0308
+[Outcome Model] epoch  9 | Train MSE 0.9993 | Val MSE 1.0332
+[Outcome Model] epoch 10 | Train MSE 1.0027 | Val MSE 1.0388
+[Outcome Model] epoch 11 | Train MSE 1.0001 | Val MSE 1.0392
+[Outcome Model] epoch 12 | Train MSE 0.9991 | Val MSE 1.0403
+[Outcome Model] epoch 13 | Train MSE 0.9955 | Val MSE 1.0330
+[Outcome Model] epoch 14 | Train MSE 1.0001 | Val MSE 1.0378
+[Outcome Model] epoch 15 | Train MSE 0.9942 | Val MSE 1.0337
+[Outcome Model] epoch 16 | Train MSE 0.9996 | Val MSE 1.0335
+[Outcome Model] epoch 17 | Train MSE 0.9980 | Val MSE 1.0350
+[Outcome Model] epoch 18 | Train MSE 0.9954 | Val MSE 1.0323
+[Outcome Model] epoch 19 | Train MSE 0.9976 | Val MSE 1.0404
+[Outcome Model] epoch 20 | Train MSE 0.9945 | Val MSE 1.0245
+[Outcome Model] epoch 21 | Train MSE 0.9979 | Val MSE 1.0304
+[Outcome Model] epoch 22 | Train MSE 0.9951 | Val MSE 1.0363
+[Outcome Model] epoch 23 | Train MSE 0.9989 | Val MSE 1.0372
+[Outcome Model] epoch 24 | Train MSE 0.9968 | Val MSE 1.0297
+[Outcome Model] epoch 25 | Train MSE 0.9950 | Val MSE 1.0377
+[Outcome Model] epoch 26 | Train MSE 0.9975 | Val MSE 1.0369
+[Outcome Model] epoch 27 | Train MSE 0.9974 | Val MSE 1.0364
+[Outcome Model] epoch 28 | Train MSE 0.9948 | Val MSE 1.0287
+[Outcome Model] epoch 29 | Train MSE 0.9957 | Val MSE 1.0381
+[Outcome Model] epoch 30 | Train MSE 0.9946 | Val MSE 1.0361
+[Outcome Model] epoch 31 | Train MSE 0.9965 | Val MSE 1.0339
+[Outcome Model] epoch 32 | Train MSE 0.9942 | Val MSE 1.0355
+[Outcome Model] epoch 33 | Train MSE 0.9939 | Val MSE 1.0383
+[Outcome Model] epoch 34 | Train MSE 0.9966 | Val MSE 1.0316
+[Outcome Model] epoch 35 | Train MSE 0.9937 | Val MSE 1.0348
+Early stopping triggered at epoch 35
+[Nuisance Training] epoch  1 | Prop Val CE 1.787 | Out Val MSE 1.0732
+[Nuisance Training] epoch  2 | Prop Val CE 1.784 | Out Val MSE 1.0516
+[Nuisance Training] epoch  3 | Prop Val CE 1.782 | Out Val MSE 1.0423
+[Nuisance Training] epoch  4 | Prop Val CE 1.781 | Out Val MSE 1.0541
+[Nuisance Training] epoch  5 | Prop Val CE 1.782 | Out Val MSE 1.0393
+[Nuisance Training] epoch  6 | Prop Val CE 1.782 | Out Val MSE 1.0557
+[Nuisance Training] epoch  7 | Prop Val CE 1.784 | Out Val MSE 1.0570
+[Nuisance Training] epoch  8 | Prop Val CE 1.786 | Out Val MSE 1.0477
+[Nuisance Training] epoch  9 | Prop Val CE 1.786 | Out Val MSE 1.0497
+[Nuisance Training] epoch 10 | Prop Val CE 1.790 | Out Val MSE 1.0451
+[Nuisance Training] epoch 11 | Prop Val CE 1.791 | Out Val MSE 1.0397
+[Nuisance Training] epoch 12 | Prop Val CE 1.792 | Out Val MSE 1.0542
+[Nuisance Training] epoch 13 | Prop Val CE 1.794 | Out Val MSE 1.0489
+[Nuisance Training] epoch 14 | Prop Val CE 1.796 | Out Val MSE 1.0396
+[Nuisance Training] epoch 15 | Prop Val CE 1.797 | Out Val MSE 1.0460
+[Nuisance Training] epoch 16 | Prop Val CE 1.799 | Out Val MSE 1.0594
+[Nuisance Training] epoch 17 | Prop Val CE 1.796 | Out Val MSE 1.0479
+[Nuisance Training] epoch 18 | Prop Val CE 1.797 | Out Val MSE 1.0439
+[Nuisance Training] epoch 19 | Prop Val CE 1.798 | Out Val MSE 1.0454
+[Nuisance Training] epoch 20 | Prop Val CE 1.798 | Out Val MSE 1.0489
+[Nuisance Training] epoch  1 | Prop Val CE 1.785 | Out Val MSE 1.0457
+[Nuisance Training] epoch  2 | Prop Val CE 1.781 | Out Val MSE 1.0648
+[Nuisance Training] epoch  3 | Prop Val CE 1.778 | Out Val MSE 1.0384
+[Nuisance Training] epoch  4 | Prop Val CE 1.777 | Out Val MSE 1.0476
+[Nuisance Training] epoch  5 | Prop Val CE 1.776 | Out Val MSE 1.0432
+[Nuisance Training] epoch  6 | Prop Val CE 1.777 | Out Val MSE 1.0404
+[Nuisance Training] epoch  7 | Prop Val CE 1.777 | Out Val MSE 1.0402
+[Nuisance Training] epoch  8 | Prop Val CE 1.778 | Out Val MSE 1.0537
+[Nuisance Training] epoch  9 | Prop Val CE 1.778 | Out Val MSE 1.0339
+[Nuisance Training] epoch 10 | Prop Val CE 1.779 | Out Val MSE 1.0375
+[Nuisance Training] epoch 11 | Prop Val CE 1.780 | Out Val MSE 1.0404
+[Nuisance Training] epoch 12 | Prop Val CE 1.780 | Out Val MSE 1.0427
+[Nuisance Training] epoch 13 | Prop Val CE 1.781 | Out Val MSE 1.0446
+[Nuisance Training] epoch 14 | Prop Val CE 1.781 | Out Val MSE 1.0412
+[Nuisance Training] epoch 15 | Prop Val CE 1.782 | Out Val MSE 1.0393
+[Nuisance Training] epoch 16 | Prop Val CE 1.782 | Out Val MSE 1.0355
+[Nuisance Training] epoch 17 | Prop Val CE 1.783 | Out Val MSE 1.0405
+[Nuisance Training] epoch 18 | Prop Val CE 1.783 | Out Val MSE 1.0415
+[Nuisance Training] epoch 19 | Prop Val CE 1.783 | Out Val MSE 1.0363
+[Nuisance Training] epoch 20 | Prop Val CE 1.783 | Out Val MSE 1.0371
+[Nuisance Training] epoch 21 | Prop Val CE 1.783 | Out Val MSE 1.0372
+[Nuisance Training] epoch 22 | Prop Val CE 1.784 | Out Val MSE 1.0414
+[Nuisance Training] epoch 23 | Prop Val CE 1.784 | Out Val MSE 1.0356
+[Nuisance Training] epoch 24 | Prop Val CE 1.784 | Out Val MSE 1.0376
+[ITE Head] epoch  1 | Train MSE 8.5684 | Val MSE 8.2848
+[ITE Head] epoch  2 | Train MSE 8.5552 | Val MSE 8.2898
+[ITE Head] epoch  3 | Train MSE 8.5568 | Val MSE 8.2908
+[ITE Head] epoch  4 | Train MSE 8.5497 | Val MSE 8.2962
+[ITE Head] epoch  5 | Train MSE 8.5496 | Val MSE 8.2982
+[ITE Head] epoch  6 | Train MSE 8.5579 | Val MSE 8.2920
+[ITE Head] epoch  7 | Train MSE 8.5498 | Val MSE 8.2965
+[ITE Head] epoch  8 | Train MSE 8.5471 | Val MSE 8.3004
+[ITE Head] epoch  9 | Train MSE 8.5535 | Val MSE 8.3012
+[ITE Head] epoch 10 | Train MSE 8.5427 | Val MSE 8.2990
+[ITE Head] epoch 11 | Train MSE 8.5564 | Val MSE 8.3013
+[ITE Head] epoch 12 | Train MSE 8.5349 | Val MSE 8.3000
+[ITE Head] epoch 13 | Train MSE 8.5418 | Val MSE 8.3007
+[ITE Head] epoch 14 | Train MSE 8.5446 | Val MSE 8.3053
+[ITE Head] epoch 15 | Train MSE 8.5492 | Val MSE 8.3056
+[ITE Head] epoch 16 | Train MSE 8.5458 | Val MSE 8.2993
+ITE early stopping at epoch 16.
+[Diffusion] epoch  1 | Train MSE 0.8595 | Val MSE 0.6222
+[Diffusion] epoch  2 | Train MSE 0.4221 | Val MSE 0.2931
+[Diffusion] epoch  3 | Train MSE 0.2260 | Val MSE 0.2077
+[Diffusion] epoch  4 | Train MSE 0.1834 | Val MSE 0.1830
+[Diffusion] epoch  5 | Train MSE 0.1643 | Val MSE 0.1742
+[Diffusion] epoch  6 | Train MSE 0.1645 | Val MSE 0.1654
+[Diffusion] epoch  7 | Train MSE 0.1513 | Val MSE 0.1582
+[Diffusion] epoch  8 | Train MSE 0.1501 | Val MSE 0.1561
+[Diffusion] epoch  9 | Train MSE 0.1431 | Val MSE 0.1463
+[Diffusion] epoch 10 | Train MSE 0.1341 | Val MSE 0.1433
+[Diffusion] epoch 11 | Train MSE 0.1305 | Val MSE 0.1384
+[Diffusion] epoch 12 | Train MSE 0.1283 | Val MSE 0.1356
+[Diffusion] epoch 13 | Train MSE 0.1222 | Val MSE 0.1307
+[Diffusion] epoch 14 | Train MSE 0.1167 | Val MSE 0.1283
+[Diffusion] epoch 15 | Train MSE 0.1185 | Val MSE 0.1231
+[Diffusion] epoch 16 | Train MSE 0.1099 | Val MSE 0.1170
+[Diffusion] epoch 17 | Train MSE 0.1083 | Val MSE 0.1139
+[Diffusion] epoch 18 | Train MSE 0.1029 | Val MSE 0.1130
+[Diffusion] epoch 19 | Train MSE 0.1012 | Val MSE 0.1090
+[Diffusion] epoch 20 | Train MSE 0.0979 | Val MSE 0.1053
+[Diffusion] epoch 21 | Train MSE 0.0977 | Val MSE 0.1017
+[Diffusion] epoch 22 | Train MSE 0.0984 | Val MSE 0.1025
+[Diffusion] epoch 23 | Train MSE 0.0975 | Val MSE 0.0978
+[Diffusion] epoch 24 | Train MSE 0.0944 | Val MSE 0.0978
+[Diffusion] epoch 25 | Train MSE 0.0918 | Val MSE 0.0952
+[Diffusion] epoch 26 | Train MSE 0.0852 | Val MSE 0.0922
+[Diffusion] epoch 27 | Train MSE 0.0903 | Val MSE 0.0931
+[Diffusion] epoch 28 | Train MSE 0.0853 | Val MSE 0.0941
+[Diffusion] epoch 29 | Train MSE 0.0859 | Val MSE 0.0919
+[Diffusion] epoch 30 | Train MSE 0.0859 | Val MSE 0.0915
+[Diffusion] epoch 31 | Train MSE 0.0846 | Val MSE 0.0887
+[Diffusion] epoch 32 | Train MSE 0.0838 | Val MSE 0.0893
+[Diffusion] epoch 33 | Train MSE 0.0828 | Val MSE 0.0879
+[Diffusion] epoch 34 | Train MSE 0.0848 | Val MSE 0.0874
+[Diffusion] epoch 35 | Train MSE 0.0860 | Val MSE 0.0832
+[Diffusion] epoch 36 | Train MSE 0.0819 | Val MSE 0.0841
+[Diffusion] epoch 37 | Train MSE 0.0796 | Val MSE 0.0825
+[Diffusion] epoch 38 | Train MSE 0.0761 | Val MSE 0.0816
+[Diffusion] epoch 39 | Train MSE 0.0803 | Val MSE 0.0811
+[Diffusion] epoch 40 | Train MSE 0.0791 | Val MSE 0.0795
+[Diffusion] epoch 41 | Train MSE 0.0736 | Val MSE 0.0829
+[Diffusion] epoch 42 | Train MSE 0.0736 | Val MSE 0.0786
+[Diffusion] epoch 43 | Train MSE 0.0758 | Val MSE 0.0795
+[Diffusion] epoch 44 | Train MSE 0.0737 | Val MSE 0.0813
+[Diffusion] epoch 45 | Train MSE 0.0770 | Val MSE 0.0826
+[Diffusion] epoch 46 | Train MSE 0.0773 | Val MSE 0.0798
+[Diffusion] epoch 47 | Train MSE 0.0737 | Val MSE 0.0775
+[Diffusion] epoch 48 | Train MSE 0.0784 | Val MSE 0.0778
+[Diffusion] epoch 49 | Train MSE 0.0729 | Val MSE 0.0735
+[Diffusion] epoch 50 | Train MSE 0.0725 | Val MSE 0.0765
+[Diffusion] epoch 51 | Train MSE 0.0726 | Val MSE 0.0720
+[Diffusion] epoch 52 | Train MSE 0.0712 | Val MSE 0.0749
+[Diffusion] epoch 53 | Train MSE 0.0688 | Val MSE 0.0736
+[Diffusion] epoch 54 | Train MSE 0.0729 | Val MSE 0.0701
+[Diffusion] epoch 55 | Train MSE 0.0677 | Val MSE 0.0709
+[Diffusion] epoch 56 | Train MSE 0.0693 | Val MSE 0.0714
+[Diffusion] epoch 57 | Train MSE 0.0681 | Val MSE 0.0708
+[Diffusion] epoch 58 | Train MSE 0.0682 | Val MSE 0.0689
+[Diffusion] epoch 59 | Train MSE 0.0681 | Val MSE 0.0673
+[Diffusion] epoch 60 | Train MSE 0.0668 | Val MSE 0.0664
+[Diffusion] epoch 61 | Train MSE 0.0635 | Val MSE 0.0676
+[Diffusion] epoch 62 | Train MSE 0.0645 | Val MSE 0.0677
+[Diffusion] epoch 63 | Train MSE 0.0635 | Val MSE 0.0641
+[Diffusion] epoch 64 | Train MSE 0.0641 | Val MSE 0.0647
+[Diffusion] epoch 65 | Train MSE 0.0628 | Val MSE 0.0637
+[Diffusion] epoch 66 | Train MSE 0.0636 | Val MSE 0.0672
+[Diffusion] epoch 67 | Train MSE 0.0641 | Val MSE 0.0649
+[Diffusion] epoch 68 | Train MSE 0.0609 | Val MSE 0.0643
+[Diffusion] epoch 69 | Train MSE 0.0599 | Val MSE 0.0624
+[Diffusion] epoch 70 | Train MSE 0.0618 | Val MSE 0.0636
+[Diffusion] epoch 71 | Train MSE 0.0609 | Val MSE 0.0609
+[Diffusion] epoch 72 | Train MSE 0.0618 | Val MSE 0.0626
+[Diffusion] epoch 73 | Train MSE 0.0587 | Val MSE 0.0609
+[Diffusion] epoch 74 | Train MSE 0.0598 | Val MSE 0.0630
+[Diffusion] epoch 75 | Train MSE 0.0594 | Val MSE 0.0613
+[Diffusion] epoch 76 | Train MSE 0.0580 | Val MSE 0.0600
+[Diffusion] epoch 77 | Train MSE 0.0577 | Val MSE 0.0595
+[Diffusion] epoch 78 | Train MSE 0.0558 | Val MSE 0.0578
+[Diffusion] epoch 79 | Train MSE 0.0598 | Val MSE 0.0592
+[Diffusion] epoch 80 | Train MSE 0.0567 | Val MSE 0.0574
+[Diffusion] epoch 81 | Train MSE 0.0522 | Val MSE 0.0566
+[Diffusion] epoch 82 | Train MSE 0.0539 | Val MSE 0.0554
+[Diffusion] epoch 83 | Train MSE 0.0592 | Val MSE 0.0553
+[Diffusion] epoch 84 | Train MSE 0.0568 | Val MSE 0.0556
+[Diffusion] epoch 85 | Train MSE 0.0551 | Val MSE 0.0545
+[Diffusion] epoch 86 | Train MSE 0.0527 | Val MSE 0.0527
+[Diffusion] epoch 87 | Train MSE 0.0521 | Val MSE 0.0527
+[Diffusion] epoch 88 | Train MSE 0.0526 | Val MSE 0.0567
+[Diffusion] epoch 89 | Train MSE 0.0538 | Val MSE 0.0599
+[Diffusion] epoch 90 | Train MSE 0.0532 | Val MSE 0.0543
+[Diffusion] epoch 91 | Train MSE 0.0539 | Val MSE 0.0532
+[Diffusion] epoch 92 | Train MSE 0.0515 | Val MSE 0.0523
+[Diffusion] epoch 93 | Train MSE 0.0518 | Val MSE 0.0536
+[Diffusion] epoch 94 | Train MSE 0.0496 | Val MSE 0.0480
+[Diffusion] epoch 95 | Train MSE 0.0475 | Val MSE 0.0507
+[Diffusion] epoch 96 | Train MSE 0.0474 | Val MSE 0.0519
+[Diffusion] epoch 97 | Train MSE 0.0483 | Val MSE 0.0476
+[Diffusion] epoch 98 | Train MSE 0.0490 | Val MSE 0.0486
+[Diffusion] epoch 99 | Train MSE 0.0459 | Val MSE 0.0467
+[Diffusion] epoch 100 | Train MSE 0.0468 | Val MSE 0.0466
+
+============================================================
+(i) FACTUAL PREDICTION  |  test samples: 615
+============================================================
+ #    t_obs  y_hat     y   SE
+ 0 V150-225  -0.00  1.83 3.35
+ 1  VLX75QD   0.04  1.29 1.56
+ 2  V75-225  -0.11 -1.42 1.72
+ 3  D60-120   0.04 -1.60 2.69
+ 4  V75-225  -0.11 -0.34 0.05
+... (610 more rows)
+------------------------------------------------------------
+MSE: 0.9870   RMSE: 0.9935
+saved -> results\factual.csv
+============================================================
+
+================================================================================
+(ii) COUNTERFACTUAL PREDICTIONS  |  patients: 615  |  K = 6  ->  5 tcf per patient  |  n_mc = 1
+================================================================================
+                 tcf  pi_beta(S, Ccf, tcf)  pi_beta(S, C, tcf)
+# t_obs                                                       
+0 V150-225   D60-120                 -0.02               -0.01
+  V150-225   DLX60QD                  0.07                0.04
+  V150-225   V75-225                 -0.00                0.00
+  V150-225  VLX150QD                  0.03                0.03
+  V150-225   VLX75QD                 -0.11               -0.10
+1 VLX75QD    D60-120                  0.09                0.07
+  VLX75QD    DLX60QD                  0.11                0.09
+  VLX75QD   V150-225                  0.01               -0.01
+  VLX75QD    V75-225                  0.01               -0.05
+  VLX75QD   VLX150QD                  0.08                0.06
+2 V75-225    D60-120                  0.12                0.09
+  V75-225    DLX60QD                  0.10                0.10
+  V75-225   V150-225                  0.08                0.07
+  V75-225   VLX150QD                  0.05                0.05
+  V75-225    VLX75QD                 -0.09               -0.09
+3 D60-120    DLX60QD                  0.22                0.21
+  D60-120   V150-225                  0.11                0.11
+  D60-120    V75-225                  0.02                0.03
+  D60-120   VLX150QD                  0.09                0.07
+  D60-120    VLX75QD                 -0.16               -0.16
+4 V75-225    D60-120                  0.01                0.00
+  V75-225    DLX60QD                  0.15                0.15
+  V75-225   V150-225                 -0.03               -0.04
+  V75-225   VLX150QD                  0.06                0.06
+  V75-225    VLX75QD                 -0.05               -0.06
+... (610 more patients)
+--------------------------------------------------------------------------------
+mean | pi_beta(S, Ccf, tcf): 0.02 | pi_beta(S, C, tcf): 0.02
+mean |gen - fixed| (diffusion contribution): 0.009
+saved -> results\counterfactual.csv
+================================================================================
+

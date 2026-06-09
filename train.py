@@ -70,14 +70,14 @@ def evaluate_propensity(inp, enc, prop, loader, device=DEVICE) -> tuple[float, f
 def evaluate_outcome(inp, enc, out, loader, device=DEVICE):
     """Evaluate the outcome prediction MSE on the val/test set."""
     for m in [inp, enc, out]: m.eval()      # Set to eval mode
-    mse = nn.MSELoss(reduction="sum")
+    mse = nn.MSELoss()
     n, mse_sum = 0, 0.0
     for z in loader:
         num, cat, t, y = (b.to(device) for b in z)
         S, C = enc(inp(num, cat))           # Enchode C, no aug
         y_pred = out(S, C, t)               # predict outcome
         mse_sum += mse(y_pred, y).item()    # Accumulate MSE
-        n += y.shape[0]
+        n += 1
     return mse_sum / n                      # Return average MSE
 
 
@@ -141,14 +141,14 @@ def evaluate_ite(val_dl, ite, device=DEVICE, eps=CLIPPING_EPS, trim=TRIM):
     """Evaluate the ITE head.
        Uses MSE throughout to match the training loss."""
     ite.eval()
-    mse = nn.MSELoss(reduction="sum")
+    mse = nn.MSELoss()
     n, mse_sum = 0, 0.0
     for z in val_dl:
         S, C, eff = (b.to(device) for b in z)
         pred = ite(S, C)            # predict ITE
         loss = mse(pred, eff)       # regression loss
         mse_sum += loss.item()
-        n += eff.size(0)
+        n += 1
     return mse_sum / n
 
 
@@ -159,8 +159,8 @@ def evaluate_denoiser(inp, enc, denoiser, loader, alpha_bars, device=DEVICE, see
     for m in (inp, enc, denoiser): m.eval()
     T = len(alpha_bars)
     g = torch.Generator(device=device).manual_seed(seed)
-    mse = nn.MSELoss(reduction="sum")
-    n_elem, se = 0, 0.0
+    mse = nn.MSELoss()
+    n, mse_sum = 0, 0.0
     for num, cat, t, _ in loader:
         num, cat, t = num.to(device), cat.to(device), t.to(device)
         S, C = enc(inp(num, cat))                              # clean C, no aug
@@ -169,8 +169,8 @@ def evaluate_denoiser(inp, enc, denoiser, loader, alpha_bars, device=DEVICE, see
         ab   = alpha_bars[step].unsqueeze(1)                   # (B, 1)
         C_t  = torch.sqrt(ab) * C + torch.sqrt(1 - ab) * eps   # forward diffusion
         eps_hat = denoiser(C_t, step, S, t)
-        se += mse(eps_hat, eps).item(); n_elem += eps.numel()
-    return se / n_elem
+        mse_sum += mse(eps_hat, eps).item(); n += 1
+    return mse_sum / n
 
 
 def train_representation(data: Dataset, epochs=EPOCHS, patience=PATIENCE, device=DEVICE):
@@ -186,7 +186,7 @@ def train_representation(data: Dataset, epochs=EPOCHS, patience=PATIENCE, device
     # Init Optimizer and Loss Functions
     p = [p for m in parts for p in m.parameters()]
     opt = torch.optim.Adam(p, lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
-    mse, ce = nn.MSELoss(reduction="sum"), nn.CrossEntropyLoss()
+    mse, ce = nn.MSELoss(), nn.CrossEntropyLoss()
     
     es = EarlyStopping(patience)
     mods = {"inp": inp, "enc": enc, "prop": prop}
@@ -237,7 +237,7 @@ def train_representation(data: Dataset, epochs=EPOCHS, patience=PATIENCE, device
             running["stab"] += loss_stab.item()
             running["mmd"] += loss_mmd.item()
             running["prop"] += loss_prop.item()
-            n_batches += x.size(0)
+            n_batches += 1
 
         # average losses for train/val
         avg = {k: v / n_batches for k, v in running.items()}
@@ -262,7 +262,7 @@ def train_outcome(data, inp, enc, epochs=EPOCHS, patience=PATIENCE, device=DEVIC
 
     # Init Optimizer and Loss Functions
     opt = torch.optim.Adam(out.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
-    mse = nn.MSELoss(reduction="sum")
+    mse = nn.MSELoss()
     
     es = EarlyStopping(patience); mods = {"out": out}
 
@@ -279,7 +279,7 @@ def train_outcome(data, inp, enc, epochs=EPOCHS, patience=PATIENCE, device=DEVIC
 
             # Loss sum
             mse_sum += loss.item()
-            n_batches += y_hat.shape[0]
+            n_batches += 1
 
         # average losses for train/val
         val_mse = evaluate_outcome(inp, enc, out, data.val_dl)
@@ -337,7 +337,7 @@ def train_ite(train_dl, val_dl, K, device=DEVICE, epochs=EPOCHS) -> ITEHead:
     """Train the ITE head on the DR targets."""
     ite = ITEHead(K).to(device)
     opt = torch.optim.Adam(ite.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
-    mse = nn.MSELoss(reduction="sum")
+    mse = nn.MSELoss()
     es  = EarlyStopping(PATIENCE)
 
     for epoch in range(epochs):
@@ -352,7 +352,7 @@ def train_ite(train_dl, val_dl, K, device=DEVICE, epochs=EPOCHS) -> ITEHead:
 
             # Loss sum
             mse_sum += loss.item()
-            n_batches += eff.size(0)
+            n_batches += 1
 
         val_mse = evaluate_ite(val_dl, ite)
         print(f"[ITE Head] epoch {epoch+1:2d} | Train MSE {mse_sum / n_batches:.4f} | Val MSE {val_mse:.4f}")
@@ -374,7 +374,7 @@ def train_denoiser(data, inp, enc, epochs=EPOCHS, patience=PATIENCE,
     alpha_bars = schedule[2].to(device)
 
     opt = torch.optim.Adam(denoiser.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
-    mse = nn.MSELoss(reduction="sum")
+    mse = nn.MSELoss()
     es  = EarlyStopping(patience); mods = {"denoiser": denoiser}
 
     for epoch in range(epochs):
@@ -393,7 +393,7 @@ def train_denoiser(data, inp, enc, epochs=EPOCHS, patience=PATIENCE,
             
             loss = mse(eps_hat, eps)                                 
             opt.zero_grad(); loss.backward(); opt.step()
-            mse_sum += loss.item(); n_batches += C.shape[0]
+            mse_sum += loss.item(); n_batches += 1
 
         val_mse = evaluate_denoiser(inp, enc, denoiser, data.val_dl, alpha_bars)
         print(f"[Diffusion] epoch {epoch+1:2d} | Train MSE {mse_sum / n_batches:.4f} | Val MSE {val_mse:.4f}")
@@ -405,19 +405,19 @@ def train_denoiser(data, inp, enc, epochs=EPOCHS, patience=PATIENCE,
     return mods["denoiser"]
 
 
-def train_all(data: Dataset, path = MODEL_SAVE_PATH, seed=set_seed(), load_existing=False) -> Models:
+def train_all(data: Dataset, path = MODEL_SAVE_PATH, seed=set_seed(), load_existing=False, device=DEVICE) -> Models:
     
     # Init 
     os.makedirs("models", exist_ok=True)
     set_seed(seed)
 
     if load_existing:
-        inp = InputProcessing(data.num_dim, data.cat_dim).to(DEVICE)
-        enc = Encoder(inp.din).to(DEVICE)
-        prop = PropensityHead(data.K).to(DEVICE)
-        out = OutcomeModel(data.K).to(DEVICE)
-        ite = ITEHead(data.K).to(DEVICE)
-        denoiser = Denoiser(data.K).to(DEVICE)
+        inp = InputProcessing(data.num_dim, data.cat_dim).to(device)
+        enc = Encoder(inp.din).to(device)
+        prop = PropensityHead(data.K).to(device)
+        out = OutcomeModel(data.K).to(device)
+        ite = ITEHead(data.K).to(device)
+        denoiser = Denoiser(data.K).to(device)
 
         inp.load_state_dict(torch.load(os.path.join(path, "inp.pt")))
         enc.load_state_dict(torch.load(os.path.join(path, "enc.pt")))

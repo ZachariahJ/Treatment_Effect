@@ -3,8 +3,7 @@
 A multi-stage model for individual treatment effect (ITE) estimation. A shared encoder splits
 the input into a **stable** representation $S$ and a **confounding** representation $C$;
 downstream heads model propensity, outcomes, doubly-robust ITE targets, and a conditional
-diffusion model over $C$. Stages are trained sequentially with Adam, early stopping, and
-`reduction="sum"` MSE/CE losses (see `train_all` in `train.py`).
+diffusion model over $C$.
 
 ## Shared notation
 
@@ -13,7 +12,7 @@ diffusion model over $C$. Stages are trained sequentially with Adam, early stopp
 | $x$               | `x`       | Input covariates                          |
 | $S,\ C$           | `S`, `C`  | Stable / confounding representation       |
 | $t,\ y$           | `t`, `y`  | Treatment ($K$ groups) / observed outcome |
-| $\Phi_\phi$       | `enc`     | Encoder, maps $x$ into $S, C$   |
+| $\Phi_\phi$       | `enc`     | Encoder, maps $x$ into $S, C$             |
 | $\pi_\beta(C)$    | `prop`    | Propensity head                           |
 | $f_\theta(S,C,t)$ | `out`     | Outcome model                             |
 | $g_\omega(S, C)$  | `ite`     | Auxiliary ITE head                        |

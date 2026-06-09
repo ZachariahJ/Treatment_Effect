@@ -10,7 +10,7 @@ UNIQUE_ID = "UNIQUEID"
 ORDER_BY = "RAW_ID"
 THERAPY_COL = "THERAPY"
 HAMDS_COL = [f"HAMD{i:02d}" for i in range(1, 18)]
-NUM_COLS = ["AGE", "THERCODE"] + HAMDS_COL
+NUM_COLS = ["AGE"] + HAMDS_COL
 CAT_COLS = ["PROTOCOL", "ORIGIN", "GENDER", "GEOCODE"]
 
 
@@ -39,6 +39,8 @@ def _fit_preprocessor(train_df):
         "cat_maps": {c: {v: i + 1 for i, v in enumerate(train_df[c].dropna().unique())} for c in CAT_COLS}, # '0' UNKNOWN
         "therapy_map": {v: i for i, v in enumerate(sorted(train_df[THERAPY_COL].unique()))},
         "t0": train_df[THERAPY_COL].value_counts().idxmax(), # The most frequent t in training set as baseline (t0)
+        "y_mean": train_df["y"].mean(),
+        "y_std": train_df["y"].std(),
     }
 
 
@@ -49,7 +51,8 @@ def _transform(d, p):
     num = ((d[NUM_COLS] - p["mean"]) / p["std"]).fillna(0).astype("float32").values
     cat = np.stack([d[c].map(p["cat_maps"][c]).fillna(0).astype("int64").values for c in CAT_COLS], axis=1)
     t   = d[THERAPY_COL].map(p["therapy_map"]).fillna(0).astype("int64").values
-    y   = d["y"].values.astype("float32")
+    # y   = d["y"].values.astype("float32")
+    y   = ((d["y"] - p["y_mean"]) / p["y_std"]).fillna(0).astype("float32").values
     return num, cat, t, y
 
 
