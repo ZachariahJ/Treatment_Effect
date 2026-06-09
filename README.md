@@ -13,7 +13,7 @@ diffusion model over $C$. Stages are trained sequentially with Adam, early stopp
 | $x$               | `x`       | Input covariates                          |
 | $S,\ C$           | `S`, `C`  | Stable / confounding representation       |
 | $t,\ y$           | `t`, `y`  | Treatment ($K$ groups) / observed outcome |
-| $\Phi_\phi$       | `enc`     | Encoder, maps $\mathcal{x}$ into $S, C$   |
+| $\Phi_\phi$       | `enc`     | Encoder, maps $x$ into $S, C$   |
 | $\pi_\beta(C)$    | `prop`    | Propensity head                           |
 | $f_\theta(S,C,t)$ | `out`     | Outcome model                             |
 | $g_\omega(S, C)$  | `ite`     | Auxiliary ITE head                        |
