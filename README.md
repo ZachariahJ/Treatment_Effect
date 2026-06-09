@@ -36,10 +36,10 @@ loss function is a **weighted combination** of four components:
 
 ```math
 \mathcal{L}_{\text{rep}}
-= \lambda_{\text{stab}}\,\mathcal{L}_{\text{stab}}
-+ \lambda_{\text{prop}}\,\mathcal{L}_{\text{prop}}
-+ \lambda_{\text{mmd}}\,\mathcal{L}_{\text{mmd}}
-+ \lambda_{\text{ac}}\,\bigl(\mathcal{L}_{\text{ac}}^{S} + \mathcal{L}_{\text{ac}}^{C}\bigr)
+= \lambda_{\text{stab}}\mathcal{L}_{\text{stab}}
++ \lambda_{\text{prop}}\mathcal{L}_{\text{prop}}
++ \lambda_{\text{mmd}}\mathcal{L}_{\text{mmd}}
++ \lambda_{\text{ac}}\bigl(\mathcal{L}_{\text{ac}}^{S} + \mathcal{L}_{\text{ac}}^{C}\bigr)
 ```
 
 
@@ -59,7 +59,7 @@ loss function is a **weighted combination** of four components:
 Single-term regression loss between the factual prediction $(f_\theta(S, C, t))$ and the observed outcome $(y)$.
 
 $$
-\mathcal{L}_{\text{out}} = \mathrm{MSE}\bigl(f_\theta(S, C, t),\, y\bigr)
+\mathcal{L}_{\text{out}} = \mathrm{MSE}\bigl(f_\theta(S, C, t), y\bigr)
 $$
 
 
@@ -77,7 +77,7 @@ $$
 Provides Individual Treatment Effect (ITE) relative to the most frequent treatment in training.
 
 $$
-\mathcal{L}_{\text{ite}} = \mathrm{MSE}\bigl(g_\omega(S, C),\, \tau\bigr)
+\mathcal{L}_{\text{ite}} = \mathrm{MSE}\bigl(g_\omega(S, C), \tau\bigr)
 $$
 
 where $\tau$ (`effect_target`) is the doubly-robust target from the cross-fitted nuisances.
