@@ -33,13 +33,15 @@ diffusion model over $C$. Stages are trained sequentially with Adam, early stopp
 Augment each batch into two views $x^{(1)}, x^{(2)}$, encode to $(S^{(i)}, C^{(i)})$. The 
 loss function is a **weighted combination** of four components:
 
-$$
+
+```math
 \mathcal{L}_{\text{rep}}
 = \lambda_{\text{stab}}\,\mathcal{L}_{\text{stab}}
 + \lambda_{\text{prop}}\,\mathcal{L}_{\text{prop}}
 + \lambda_{\text{mmd}}\,\mathcal{L}_{\text{mmd}}
 + \lambda_{\text{ac}}\,\bigl(\mathcal{L}_{\text{ac}}^{S} + \mathcal{L}_{\text{ac}}^{C}\bigr)
-$$
+```
+
 
 | Component                    | Definition                                                          | Purpose                                                         |
 | ---                          | ---                                                                 | ---                                                             |
@@ -90,5 +92,5 @@ where $\tau$ (`effect_target`) is the doubly-robust target from the cross-fitted
 DDPM $\varepsilon$-prediction over frozen $C$, conditioned on step $s$, $S$, and $t$:
 
 $$
-\mathcal{L}_{\text{diff}} = \mathrm{MSE}\bigl(\hat{\varepsilon_\theta},\, \varepsilon\bigr)
+\mathcal{L}_{\text{diff}} = \mathrm{MSE}\bigl(\hat{\varepsilon_\theta}, \varepsilon\bigr)
 $$
