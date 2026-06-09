@@ -15,12 +15,15 @@ WINSORIZATION_QUANTILES = (0.01, 0.99)
 # Loss weights
 LAMBDA_STAB = 1.0
 LAMBDA_MMD = 1.0
+LAMBDA_PROP = 1.0
 LAMBDA_AC = 0.1
+
+
 
 # Configurations and Hyperparameters
 SEED: int   = 42
 EPOCHS: int = 100
-BATCH_SIZE  = 32
+BATCH_SIZE  = 4096
 PATIENCE    = 15
 
 # Optimizer Hyperparameters
