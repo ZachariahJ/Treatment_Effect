@@ -120,7 +120,7 @@ def run_inference(models: Models, sample_dl, K, therapy_mapping,
 def main():
     set_seed()
     data = data_preprocessing()
-    models = train_all(data, load_existing=True)
+    models = train_all(data, load_existing=False)
 
     run_inference(models, data.test_dl, K=data.K, 
                   therapy_mapping=data.inverse_therapy_map)

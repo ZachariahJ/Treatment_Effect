@@ -16,6 +16,7 @@ from model import (T_STEPS, InputProcessing, Encoder, PropensityHead, OutcomeMod
 
 # DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 DEVICE = torch.device("cpu")
+SEED = set_seed()
 
 
 @dataclass
@@ -153,7 +154,7 @@ def evaluate_ite(val_dl, ite, device=DEVICE, eps=CLIPPING_EPS, trim=TRIM):
 
 
 @torch.no_grad()
-def evaluate_denoiser(inp, enc, denoiser, loader, alpha_bars, device=DEVICE, seed=set_seed()):
+def evaluate_denoiser(inp, enc, denoiser, loader, alpha_bars, device=DEVICE, seed=SEED):
     """Denoising MSE on val/test (per-element, same scale as the train log).
        Steps & noise are seeded so the metric is comparable across epochs."""
     for m in (inp, enc, denoiser): m.eval()
@@ -405,7 +406,7 @@ def train_denoiser(data, inp, enc, epochs=EPOCHS, patience=PATIENCE,
     return mods["denoiser"]
 
 
-def train_all(data: Dataset, path = MODEL_SAVE_PATH, seed=set_seed(), load_existing=False, device=DEVICE) -> Models:
+def train_all(data: Dataset, path = MODEL_SAVE_PATH, seed=SEED, load_existing=False, device=DEVICE) -> Models:
     
     # Init 
     os.makedirs("models", exist_ok=True)
