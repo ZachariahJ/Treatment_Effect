@@ -22,7 +22,7 @@ diffusion model over $C$. Stages are trained sequentially with Adam, early stopp
 | Setting            | Constant                         | Default              |
 | ---                | ---                              | ---                  |
 | LR / weight decay  | `LEARNING_RATE` / `WEIGHT_DECAY` | `1e-3` / `1e-5`      |
-| Epochs / Batch     | `EPOCHS` / `BATCH_SIZE` / ``     | `100` / `32` /       |
+| Epochs / Batch     | `EPOCHS` / `BATCH_SIZE`          | `100` / `32`         |
 | Patience           | `PATIENCE`                       | `15`                 |
 | Seed / splits      | `SEED` / `TRAIN,VAL,TEST_SPLIT`  | `42` / `0.7,0.2,0.1` |
 
@@ -41,12 +41,12 @@ $$
 + \lambda_{\text{ac}}\,\bigl(\mathcal{L}_{\text{ac}}^{S} + \mathcal{L}_{\text{ac}}^{C}\bigr)
 $$
 
-| Component                    | Definition                                                                | Purpose                                                         |
-| ---                          | ---                                                                       | ---                                                             |
-| $\mathcal{L}_{\text{stab}}$  | $\operatorname{MSE}\!\bigl(S^{(1)}, S^{(2)}\bigr)$                        | $S$ invariant across views                                      |
-| $\mathcal{L}_{\text{prop}}$  | $\tfrac{1}{2}\sum_i \operatorname{CE}\!\bigl(\pi_\beta(C^{(i)}), t\bigr)$ | $C$ predicts treatment                                          |
-| $\mathcal{L}_{\text{mmd}}$   | $\tfrac{1}{2}\sum_i \operatorname{MMD}\!\bigl(C^{(i)}, t\bigr)$           | $C$ balanced across treatments (RBF-kernel MMD$^2$)             |
-| $\mathcal{L}_{\text{ac}}(z)$ | $-$                                                                       | Anti-collapse regularization (decorrelation & variance control) |
+| Component                    | Definition                                                          | Purpose                                                         |
+| ---                          | ---                                                                 | ---                                                             |
+| $\mathcal{L}_{\text{stab}}$  | $\mathrm{MSE}\!\bigl(S^{(1)}, S^{(2)}\bigr)$                        | $S$ invariant across views                                      |
+| $\mathcal{L}_{\text{prop}}$  | $\tfrac{1}{2}\sum_i \mathrm{CE}\!\bigl(\pi_\beta(C^{(i)}), t\bigr)$ | $C$ predicts treatment                                          |
+| $\mathcal{L}_{\text{mmd}}$   | $\tfrac{1}{2}\sum_i \mathrm{MMD}\!\bigl(C^{(i)}, t\bigr)$           | $C$ balanced across treatments (RBF-kernel MMD$^2$)             |
+| $\mathcal{L}_{\text{ac}}(z)$ | $-$                                                                 | Anti-collapse regularization (decorrelation & variance control) |
 
 | Hyperparameter                                                       | Constant               | Default |
 | ---                                                                  | ---                    | ---     |
@@ -57,7 +57,7 @@ $$
 Single-term regression loss between the factual prediction ($f_\theta(S, C, t)$) and the observed outcome ($y$).
 
 $$
-\mathcal{L}_{\text{out}} = \operatorname{MSE}\!\bigl(f_\theta(S, C, t),\, y\bigr)
+\mathcal{L}_{\text{out}} = \mathrm{MSE}\!\bigl(f_\theta(S, C, t),\, y\bigr)
 $$
 
 
@@ -66,7 +66,7 @@ $$
 Cross-fitted (folds A/B): PropensityHead + OutcomeModel for the doubly-robust targets:
 
 $$
-\mathcal{L}_{\text{nuis}} = \operatorname{CE}\!\bigl(\pi_\beta(C), t\bigr) + \operatorname{MSE}\!\bigl(f_\theta(S, C, t), y\bigr)
+\mathcal{L}_{\text{nuis}} = \mathrm{CE}\!\bigl(\pi_\beta(C), t\bigr) + \mathrm{MSE}\!\bigl(f_\theta(S, C, t), y\bigr)
 $$
 
 
@@ -75,7 +75,7 @@ $$
 Provides Individual Treatment Effect (ITE) relative to the most frequent treatment in training.
 
 $$
-\mathcal{L}_{\text{ite}} = \operatorname{MSE}\!\bigl(g_\omega(S, C),\, \tau\bigr)
+\mathcal{L}_{\text{ite}} = \mathrm{MSE}\!\bigl(g_\omega(S, C),\, \tau\bigr)
 $$
 
 where $\tau$ (`effect_target`) is the doubly-robust target from the cross-fitted nuisances.
@@ -90,5 +90,5 @@ where $\tau$ (`effect_target`) is the doubly-robust target from the cross-fitted
 DDPM $\varepsilon$-prediction over frozen $C$, conditioned on step $s$, $S$, and $t$:
 
 $$
-\mathcal{L}_{\text{diff}} = \operatorname{MSE}\!\bigl(\hat{\varepsilon_\theta},\, \varepsilon\bigr)
+\mathcal{L}_{\text{diff}} = \mathrm{MSE}\!\bigl(\hat{\varepsilon_\theta},\, \varepsilon\bigr)
 $$
