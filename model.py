@@ -1,7 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-
 
 from dataset import data_preprocessing
 from config import (NOISE_STD, DROP_P, LAMBDA_STAB, LAMBDA_MMD, LAMBDA_AC, LEARNING_RATE, WEIGHT_DECAY)
@@ -93,13 +91,35 @@ class ITEHead(nn.Module):
     def __init__(self, K: int):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Linear(S_DIM + C_DIM, 128), 
-            nn.BatchNorm1d(128), nn.ReLU(), nn.Dropout(0.1),
-            nn.Linear(128, K),
+            nn.Linear(S_DIM + C_DIM, 64), 
+            nn.ReLU(), 
+            nn.Linear(64, K),
         )
 
     def forward(self, S, C):
         return self.net(torch.cat([S, C], dim=1))      # (B, K)
+
+
+class Denoiser(nn.Module):
+    """
+    eps_theta(C_t, step, S, t): given the noised C, the step index, and conditions (S, treatment), predict the noise that was added. 
+    Output has the same shape as C.
+    """
+    def __init__(self, K: int, T: int = T_STEPS):
+        super().__init__()
+        self.step_emb = nn.Embedding(T, STEP_EMB_DIM)   # step index -> vector[32]
+        self.t_emb    = nn.Embedding(K, THER_EMB_DIM)   # treatment -> vector[16]
+        din = C_DIM + STEP_EMB_DIM + S_DIM + THER_EMB_DIM
+        self.net = nn.Sequential(
+            nn.Linear(din, 128), nn.ReLU(),
+            nn.Linear(128, 128), nn.ReLU(),
+            nn.Linear(128, 128), nn.ReLU(),
+            nn.Linear(128, C_DIM),  # predicted noise
+        )
+
+    def forward(self, C_t, step, S, t):
+        h = torch.cat([C_t, self.step_emb(step), S, self.t_emb(t)], dim=1)
+        return self.net(h)
 
 
 def augment(x, noise_std=NOISE_STD, drop_p=DROP_P):
@@ -157,29 +177,6 @@ def MMD(C, t, K):
         count += 1
     return total / max(count, 1)
 
-#################################
-#################################
-#################################
-#################################
-
-# TODO: UNDERSTAND THIS FUNCTION BETTER
-@torch.no_grad()
-def dr_pseudo_targets(S, C, t, y, outcome, propensity, K, t0, eps=0.05):
-    """Doubly-robust pseudo-targets (B,K): each treatment's effect relative to baseline t0.
-    Computed with the frozen outcome/propensity models."""
-    # propensity: prob of receiving each treatment per sample (B,K);
-    # clamp avoids dividing by tiny values (propensity clipping)
-    e = torch.softmax(propensity(C), dim=1).clamp(min=eps)
-    # predicted outcome under each treatment, mu: (B,K)
-    mu = torch.stack([outcome(S, C, torch.full_like(t, k)).squeeze(1) for k in range(K)], dim=1)
-    onehot = F.one_hot(t, K).float()                   # (B,K) treatment actually received
-    y_col  = y.view(-1, 1)                              # (B,1)
-    # doubly-robust pseudo-outcome (B,K): model prediction + IPW correction
-    # only on the received-treatment column
-    Y_dr = mu + onehot / e * (y_col - mu)
-    # effect relative to baseline t0 (the baseline column naturally becomes 0)
-    return Y_dr - Y_dr[:, t0:t0 + 1]
-
 
 def make_schedule(T=T_STEPS):
     """
@@ -190,28 +187,6 @@ def make_schedule(T=T_STEPS):
     alphas = 1.0 - betas
     alpha_bars = torch.cumprod(alphas, dim=0)   # cumulative product
     return betas, alphas, alpha_bars
-
-
-class Denoiser(nn.Module):
-    """
-    eps_theta(C_t, step, S, t): given the noised C, the step index, and conditions (S, treatment), predict the noise that was added. 
-    Output has the same shape as C.
-    """
-    def __init__(self, K: int, T: int = T_STEPS):
-        super().__init__()
-        self.step_emb = nn.Embedding(T, STEP_EMB_DIM)   # step index -> vector[32]
-        self.t_emb    = nn.Embedding(K, THER_EMB_DIM)   # treatment -> vector[16]
-        din = C_DIM + STEP_EMB_DIM + S_DIM + THER_EMB_DIM
-        self.net = nn.Sequential(
-            nn.Linear(din, 128), nn.ReLU(),
-            nn.Linear(128, 128), nn.ReLU(),
-            nn.Linear(128, 128), nn.ReLU(),
-            nn.Linear(128, C_DIM),  # predicted noise
-        )
-
-    def forward(self, C_t, step, S, t):
-        h = torch.cat([C_t, self.step_emb(step), S, self.t_emb(t)], dim=1)
-        return self.net(h)
 
 
 @torch.no_grad()
