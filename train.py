@@ -14,8 +14,8 @@ from model import (T_STEPS, InputProcessing, Encoder, PropensityHead, OutcomeMod
                    ITEHead, Denoiser, make_schedule, sample_C,
                    augment, MMD, anti_collapse)
 
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# DEVICE = torch.device("cpu")
+# DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cpu")
 
 
 @dataclass

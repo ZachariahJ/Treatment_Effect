@@ -14,7 +14,7 @@ diffusion model over $C$. Stages are trained sequentially with Adam, early stopp
 | $S,\ C$           | `S`, `C`  | Stable / confounding representation       |
 | $t,\ y$           | `t`, `y`  | Treatment ($K$ groups) / observed outcome |
 | $\Phi_\phi$       | `enc`     | Encoder, maps $\mathcal{x}$ into $S, C$   |
-| $\pi_\beta(C)$    | `prop`    | Propensity he                             |
+| $\pi_\beta(C)$    | `prop`    | Propensity head                           |
 | $f_\theta(S,C,t)$ | `out`     | Outcome model                             |
 | $g_\omega(S, C)$  | `ite`     | Auxiliary ITE head                        |
 | $-$               | `denoiser`| Denoiser/Diffusion Model                  | 
@@ -43,9 +43,9 @@ $$
 
 | Component                    | Definition                                                          | Purpose                                                         |
 | ---                          | ---                                                                 | ---                                                             |
-| $\mathcal{L}_{\text{stab}}$  | $\mathrm{MSE}\!\bigl(S^{(1)}, S^{(2)}\bigr)$                        | $S$ invariant across views                                      |
-| $\mathcal{L}_{\text{prop}}$  | $\tfrac{1}{2}\sum_i \mathrm{CE}\!\bigl(\pi_\beta(C^{(i)}), t\bigr)$ | $C$ predicts treatment                                          |
-| $\mathcal{L}_{\text{mmd}}$   | $\tfrac{1}{2}\sum_i \mathrm{MMD}\!\bigl(C^{(i)}, t\bigr)$           | $C$ balanced across treatments (RBF-kernel MMD$^2$)             |
+| $\mathcal{L}_{\text{stab}}$  | $\mathrm{MSE}\bigl(S^{(1)}, S^{(2)}\bigr)$                        | $S$ invariant across views                                      |
+| $\mathcal{L}_{\text{prop}}$  | $\tfrac{1}{2}\sum_i \mathrm{CE}\bigl(\pi_\beta(C^{(i)}), t\bigr)$ | $C$ predicts treatment                                          |
+| $\mathcal{L}_{\text{mmd}}$   | $\tfrac{1}{2}\sum_i \mathrm{MMD}\bigl(C^{(i)}, t\bigr)$           | $C$ balanced across treatments (RBF-kernel MMD$^2$)             |
 | $\mathcal{L}_{\text{ac}}(z)$ | $-$                                                                 | Anti-collapse regularization (decorrelation & variance control) |
 
 | Hyperparameter                                                       | Constant               | Default |
@@ -57,7 +57,7 @@ $$
 Single-term regression loss between the factual prediction ($f_\theta(S, C, t)$) and the observed outcome ($y$).
 
 $$
-\mathcal{L}_{\text{out}} = \mathrm{MSE}\!\bigl(f_\theta(S, C, t),\, y\bigr)
+\mathcal{L}_{\text{out}} = \mathrm{MSE}\bigl(f_\theta(S, C, t),\, y\bigr)
 $$
 
 
@@ -66,7 +66,7 @@ $$
 Cross-fitted (folds A/B): PropensityHead + OutcomeModel for the doubly-robust targets:
 
 $$
-\mathcal{L}_{\text{nuis}} = \mathrm{CE}\!\bigl(\pi_\beta(C), t\bigr) + \mathrm{MSE}\!\bigl(f_\theta(S, C, t), y\bigr)
+\mathcal{L}_{\text{nuis}} = \mathrm{CE}\bigl(\pi_\beta(C), t\bigr) + \mathrm{MSE}\bigl(f_\theta(S, C, t), y\bigr)
 $$
 
 
@@ -75,7 +75,7 @@ $$
 Provides Individual Treatment Effect (ITE) relative to the most frequent treatment in training.
 
 $$
-\mathcal{L}_{\text{ite}} = \mathrm{MSE}\!\bigl(g_\omega(S, C),\, \tau\bigr)
+\mathcal{L}_{\text{ite}} = \mathrm{MSE}\bigl(g_\omega(S, C),\, \tau\bigr)
 $$
 
 where $\tau$ (`effect_target`) is the doubly-robust target from the cross-fitted nuisances.
@@ -90,5 +90,5 @@ where $\tau$ (`effect_target`) is the doubly-robust target from the cross-fitted
 DDPM $\varepsilon$-prediction over frozen $C$, conditioned on step $s$, $S$, and $t$:
 
 $$
-\mathcal{L}_{\text{diff}} = \mathrm{MSE}\!\bigl(\hat{\varepsilon_\theta},\, \varepsilon\bigr)
+\mathcal{L}_{\text{diff}} = \mathrm{MSE}\bigl(\hat{\varepsilon_\theta},\, \varepsilon\bigr)
 $$
