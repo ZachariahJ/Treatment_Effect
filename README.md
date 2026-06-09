@@ -43,12 +43,12 @@ loss function is a **weighted combination** of four components:
 ```
 
 
-| Component                    | Definition                                                          | Purpose                                                         |
-| ---                          | ---                                                                 | ---                                                             |
+| Component                    | Definition                                                        | Purpose                                                         |
+| ---                          | ---                                                               | ---                                                             |
 | $\mathcal{L}_{\text{stab}}$  | $\mathrm{MSE}\bigl(S^{(1)}, S^{(2)}\bigr)$                        | $S$ invariant across views                                      |
 | $\mathcal{L}_{\text{prop}}$  | $\tfrac{1}{2}\sum_i \mathrm{CE}\bigl(\pi_\beta(C^{(i)}), t\bigr)$ | $C$ predicts treatment                                          |
-| $\mathcal{L}_{\text{mmd}}$   | $\tfrac{1}{2}\sum_i \mathrm{MMD}\bigl(C^{(i)}, t\bigr)$           | $C$ balanced across treatments (RBF-kernel MMD$^2$)             |
-| $\mathcal{L}_{\text{ac}}(z)$ | $-$                                                                 | Anti-collapse regularization (decorrelation & variance control) |
+| $\mathcal{L}_{\text{mmd}}$   | $\tfrac{1}{2}\sum_i \mathrm{MMD}\bigl(C^{(i)}, t\bigr)$           | $C$ balanced across treatments (RBF-kernel $MMD^2$)             |
+| $\mathcal{L}_{\text{ac}}(z)$ | $-$                                                               | Anti-collapse regularization (decorrelation & variance control) |
 
 | Hyperparameter                                                       | Constant               | Default |
 | ---                                                                  | ---                    | ---     |
@@ -56,7 +56,7 @@ loss function is a **weighted combination** of four components:
 | $\lambda_{\text{ac}}$                                                | `LAMBDA_AC`            | `0.1`   |
 
 ### 2. Outcome Model (`train_outcome`)
-Single-term regression loss between the factual prediction ($f_\theta(S, C, t)$) and the observed outcome ($y$).
+Single-term regression loss between the factual prediction $(f_\theta(S, C, t))$ and the observed outcome $(y)$.
 
 $$
 \mathcal{L}_{\text{out}} = \mathrm{MSE}\bigl(f_\theta(S, C, t),\, y\bigr)
