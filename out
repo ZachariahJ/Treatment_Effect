@@ -1,0 +1,157 @@
+### SPLIT DONE ###
+Total Patients: 836
+Train/Val/Test Patients: 585/167/84
+[Representation Learning] epoch  0 | CE 1.771 | acc 0.176 | stab 0.040 | prop 1.778 | MMD 0.2350
+[Representation Learning] epoch  1 | CE 1.780 | acc 0.174 | stab 0.008 | prop 1.773 | MMD 0.1166
+[Representation Learning] epoch  2 | CE 1.777 | acc 0.190 | stab 0.005 | prop 1.774 | MMD 0.0427
+[Representation Learning] epoch  3 | CE 1.769 | acc 0.182 | stab 0.005 | prop 1.767 | MMD 0.0289
+[Representation Learning] epoch  4 | CE 1.769 | acc 0.173 | stab 0.005 | prop 1.759 | MMD 0.0246
+[Representation Learning] epoch  5 | CE 1.761 | acc 0.200 | stab 0.005 | prop 1.755 | MMD 0.0239
+[Representation Learning] epoch  6 | CE 1.765 | acc 0.175 | stab 0.005 | prop 1.745 | MMD 0.0224
+[Representation Learning] epoch  7 | CE 1.755 | acc 0.176 | stab 0.005 | prop 1.740 | MMD 0.0219
+[Representation Learning] epoch  8 | CE 1.752 | acc 0.175 | stab 0.005 | prop 1.732 | MMD 0.0230
+[Representation Learning] epoch  9 | CE 1.753 | acc 0.192 | stab 0.005 | prop 1.725 | MMD 0.0217
+[Representation Learning] epoch 10 | CE 1.756 | acc 0.187 | stab 0.005 | prop 1.721 | MMD 0.0221
+[Representation Learning] epoch 11 | CE 1.756 | acc 0.192 | stab 0.005 | prop 1.711 | MMD 0.0224
+[Representation Learning] epoch 12 | CE 1.759 | acc 0.191 | stab 0.006 | prop 1.704 | MMD 0.0217
+[Representation Learning] epoch 13 | CE 1.772 | acc 0.186 | stab 0.006 | prop 1.688 | MMD 0.0230
+[Representation Learning] epoch 14 | CE 1.760 | acc 0.195 | stab 0.006 | prop 1.680 | MMD 0.0229
+[Representation Learning] epoch 15 | CE 1.778 | acc 0.197 | stab 0.006 | prop 1.674 | MMD 0.0230
+[Representation Learning] epoch 16 | CE 1.779 | acc 0.200 | stab 0.006 | prop 1.660 | MMD 0.0234
+[Representation Learning] epoch 17 | CE 1.782 | acc 0.191 | stab 0.006 | prop 1.658 | MMD 0.0222
+[Representation Learning] epoch 18 | CE 1.802 | acc 0.192 | stab 0.006 | prop 1.632 | MMD 0.0237
+[Representation Learning] epoch 19 | CE 1.836 | acc 0.198 | stab 0.006 | prop 1.625 | MMD 0.0247
+[Representation Learning] epoch 20 | CE 1.813 | acc 0.188 | stab 0.006 | prop 1.608 | MMD 0.0264
+[Representation Learning] epoch 21 | CE 1.825 | acc 0.191 | stab 0.006 | prop 1.599 | MMD 0.0246
+[Representation Learning] epoch 22 | CE 1.844 | acc 0.195 | stab 0.006 | prop 1.586 | MMD 0.0255
+[Representation Learning] epoch 23 | CE 1.855 | acc 0.215 | stab 0.006 | prop 1.569 | MMD 0.0260
+Early stopping triggered at epoch 23
+[Representation Learning] Final Test CE: 1.750 | Test Accuracy: 0.226
+[Outcome Model] epoch  0 | Train MSE 689.0079 | Val MSE 538.0852
+[Outcome Model] epoch  1 | Train MSE 385.2320 | Val MSE 226.3517
+[Outcome Model] epoch  2 | Train MSE 133.9553 | Val MSE 66.4950
+[Outcome Model] epoch  3 | Train MSE 46.7365 | Val MSE 35.5885
+[Outcome Model] epoch  4 | Train MSE 35.8786 | Val MSE 33.2517
+[Outcome Model] epoch  5 | Train MSE 35.0369 | Val MSE 32.9044
+[Outcome Model] epoch  6 | Train MSE 34.0412 | Val MSE 33.5614
+[Outcome Model] epoch  7 | Train MSE 34.3203 | Val MSE 32.1733
+[Outcome Model] epoch  8 | Train MSE 34.0235 | Val MSE 32.4867
+[Outcome Model] epoch  9 | Train MSE 33.6985 | Val MSE 32.5721
+[Outcome Model] epoch 10 | Train MSE 34.7429 | Val MSE 32.5914
+[Outcome Model] epoch 11 | Train MSE 34.0902 | Val MSE 32.9947
+[Outcome Model] epoch 12 | Train MSE 34.0836 | Val MSE 32.0689
+[Outcome Model] epoch 13 | Train MSE 33.5524 | Val MSE 33.5677
+[Outcome Model] epoch 14 | Train MSE 34.3949 | Val MSE 32.7039
+[Outcome Model] epoch 15 | Train MSE 34.0019 | Val MSE 32.0413
+[Outcome Model] epoch 16 | Train MSE 33.5346 | Val MSE 32.3244
+[Outcome Model] epoch 17 | Train MSE 34.3371 | Val MSE 31.8005
+[Outcome Model] epoch 18 | Train MSE 33.4312 | Val MSE 31.7843
+[Outcome Model] epoch 19 | Train MSE 33.9336 | Val MSE 33.1902
+[Outcome Model] epoch 20 | Train MSE 34.2788 | Val MSE 32.0961
+[Outcome Model] epoch 21 | Train MSE 33.5787 | Val MSE 31.8016
+[Outcome Model] epoch 22 | Train MSE 33.6873 | Val MSE 32.5380
+[Outcome Model] epoch 23 | Train MSE 33.5433 | Val MSE 33.0539
+[Outcome Model] epoch 24 | Train MSE 33.4654 | Val MSE 32.0939
+[Outcome Model] epoch 25 | Train MSE 33.9776 | Val MSE 32.2740
+[Outcome Model] epoch 26 | Train MSE 33.1760 | Val MSE 31.9843
+[Outcome Model] epoch 27 | Train MSE 33.6720 | Val MSE 32.2602
+[Outcome Model] epoch 28 | Train MSE 33.5492 | Val MSE 33.4316
+[Outcome Model] epoch 29 | Train MSE 33.7259 | Val MSE 32.6212
+[Outcome Model] epoch 30 | Train MSE 33.3079 | Val MSE 32.5362
+[Outcome Model] epoch 31 | Train MSE 33.1191 | Val MSE 32.5399
+[Outcome Model] epoch 32 | Train MSE 33.4343 | Val MSE 32.2239
+[Outcome Model] epoch 33 | Train MSE 33.8452 | Val MSE 32.8636
+Early stopping triggered at epoch 33
+[Outcome Model] Final Test MSE: 30.3422
+[Nuisance Training] epoch  0 | Prop Val CE 1.778 | Out Val MSE 664.0659
+[Nuisance Training] epoch  1 | Prop Val CE 1.765 | Out Val MSE 510.1924
+[Nuisance Training] epoch  2 | Prop Val CE 1.758 | Out Val MSE 341.3675
+[Nuisance Training] epoch  3 | Prop Val CE 1.758 | Out Val MSE 203.6255
+[Nuisance Training] epoch  4 | Prop Val CE 1.761 | Out Val MSE 108.0716
+[Nuisance Training] epoch  5 | Prop Val CE 1.764 | Out Val MSE 57.2350
+[Nuisance Training] epoch  6 | Prop Val CE 1.770 | Out Val MSE 40.6382
+[Nuisance Training] epoch  7 | Prop Val CE 1.772 | Out Val MSE 36.3689
+[Nuisance Training] epoch  8 | Prop Val CE 1.775 | Out Val MSE 33.2369
+[Nuisance Training] epoch  9 | Prop Val CE 1.777 | Out Val MSE 33.0186
+[Nuisance Training] epoch 10 | Prop Val CE 1.782 | Out Val MSE 32.2710
+[Nuisance Training] epoch 11 | Prop Val CE 1.785 | Out Val MSE 32.9224
+[Nuisance Training] epoch 12 | Prop Val CE 1.786 | Out Val MSE 33.3992
+[Nuisance Training] epoch 13 | Prop Val CE 1.790 | Out Val MSE 34.0761
+[Nuisance Training] epoch 14 | Prop Val CE 1.789 | Out Val MSE 33.2046
+[Nuisance Training] epoch 15 | Prop Val CE 1.792 | Out Val MSE 33.0395
+[Nuisance Training] epoch 16 | Prop Val CE 1.791 | Out Val MSE 34.3289
+[Nuisance Training] epoch 17 | Prop Val CE 1.792 | Out Val MSE 33.8326
+[Nuisance Training] epoch 18 | Prop Val CE 1.794 | Out Val MSE 32.9164
+[Nuisance Training] epoch 19 | Prop Val CE 1.796 | Out Val MSE 33.6837
+[Nuisance Training] epoch 20 | Prop Val CE 1.792 | Out Val MSE 33.9422
+[Nuisance Training] epoch 21 | Prop Val CE 1.795 | Out Val MSE 32.7052
+[Nuisance Training] epoch 22 | Prop Val CE 1.795 | Out Val MSE 32.5889
+[Nuisance Training] epoch 23 | Prop Val CE 1.795 | Out Val MSE 32.6327
+[Nuisance Training] epoch 24 | Prop Val CE 1.797 | Out Val MSE 32.4101
+[Nuisance Training] epoch 25 | Prop Val CE 1.796 | Out Val MSE 33.2103
+[Nuisance Training] epoch  0 | Prop Val CE 1.777 | Out Val MSE 667.3143
+[Nuisance Training] epoch  1 | Prop Val CE 1.765 | Out Val MSE 518.3540
+[Nuisance Training] epoch  2 | Prop Val CE 1.755 | Out Val MSE 349.7347
+[Nuisance Training] epoch  3 | Prop Val CE 1.757 | Out Val MSE 214.6009
+[Nuisance Training] epoch  4 | Prop Val CE 1.759 | Out Val MSE 116.5725
+[Nuisance Training] epoch  5 | Prop Val CE 1.762 | Out Val MSE 64.7573
+[Nuisance Training] epoch  6 | Prop Val CE 1.765 | Out Val MSE 42.9958
+[Nuisance Training] epoch  7 | Prop Val CE 1.768 | Out Val MSE 34.0999
+[Nuisance Training] epoch  8 | Prop Val CE 1.771 | Out Val MSE 32.9014
+[Nuisance Training] epoch  9 | Prop Val CE 1.771 | Out Val MSE 33.2054
+[Nuisance Training] epoch 10 | Prop Val CE 1.774 | Out Val MSE 33.4827
+[Nuisance Training] epoch 11 | Prop Val CE 1.776 | Out Val MSE 32.9034
+[Nuisance Training] epoch 12 | Prop Val CE 1.776 | Out Val MSE 33.0017
+[Nuisance Training] epoch 13 | Prop Val CE 1.780 | Out Val MSE 32.7901
+[Nuisance Training] epoch 14 | Prop Val CE 1.781 | Out Val MSE 33.1227
+[Nuisance Training] epoch 15 | Prop Val CE 1.780 | Out Val MSE 32.9522
+[Nuisance Training] epoch 16 | Prop Val CE 1.783 | Out Val MSE 32.4287
+[Nuisance Training] epoch 17 | Prop Val CE 1.784 | Out Val MSE 32.5239
+[Nuisance Training] epoch 18 | Prop Val CE 1.785 | Out Val MSE 32.2865
+[Nuisance Training] epoch 19 | Prop Val CE 1.784 | Out Val MSE 32.6013
+[Nuisance Training] epoch 20 | Prop Val CE 1.786 | Out Val MSE 33.5176
+[Nuisance Training] epoch 21 | Prop Val CE 1.788 | Out Val MSE 33.2798
+[Nuisance Training] epoch 22 | Prop Val CE 1.790 | Out Val MSE 32.5614
+[Nuisance Training] epoch 23 | Prop Val CE 1.789 | Out Val MSE 33.2735
+[Nuisance Training] epoch 24 | Prop Val CE 1.789 | Out Val MSE 32.6828
+[Nuisance Training] epoch 25 | Prop Val CE 1.791 | Out Val MSE 32.4181
+[Nuisance Training] epoch 26 | Prop Val CE 1.792 | Out Val MSE 32.4562
+[Nuisance Training] epoch 27 | Prop Val CE 1.791 | Out Val MSE 33.2685
+[Nuisance Training] epoch 28 | Prop Val CE 1.792 | Out Val MSE 32.4861
+[Nuisance Training] epoch 29 | Prop Val CE 1.792 | Out Val MSE 32.8391
+[Nuisance Training] epoch 30 | Prop Val CE 1.793 | Out Val MSE 32.1006
+[Nuisance Training] epoch 31 | Prop Val CE 1.794 | Out Val MSE 32.6362
+[Nuisance Training] epoch 32 | Prop Val CE 1.794 | Out Val MSE 32.4440
+[Nuisance Training] epoch 33 | Prop Val CE 1.795 | Out Val MSE 32.0461
+[Nuisance Training] epoch 34 | Prop Val CE 1.796 | Out Val MSE 32.1642
+[Nuisance Training] epoch 35 | Prop Val CE 1.794 | Out Val MSE 32.3679
+[Nuisance Training] epoch 36 | Prop Val CE 1.795 | Out Val MSE 32.8402
+[Nuisance Training] epoch 37 | Prop Val CE 1.796 | Out Val MSE 32.5689
+[Nuisance Training] epoch 38 | Prop Val CE 1.796 | Out Val MSE 33.1970
+[Nuisance Training] epoch 39 | Prop Val CE 1.797 | Out Val MSE 32.1669
+[Nuisance Training] epoch 40 | Prop Val CE 1.797 | Out Val MSE 33.5886
+[Nuisance Training] epoch 41 | Prop Val CE 1.799 | Out Val MSE 32.3772
+[Nuisance Training] epoch 42 | Prop Val CE 1.798 | Out Val MSE 32.2926
+[Nuisance Training] epoch 43 | Prop Val CE 1.798 | Out Val MSE 32.6381
+[Nuisance Training] epoch 44 | Prop Val CE 1.797 | Out Val MSE 33.5053
+[Nuisance Training] epoch 45 | Prop Val CE 1.799 | Out Val MSE 33.0873
+[Nuisance Training] epoch 46 | Prop Val CE 1.799 | Out Val MSE 32.7342
+[Nuisance Training] epoch 47 | Prop Val CE 1.798 | Out Val MSE 32.7468
+[Nuisance Training] epoch 48 | Prop Val CE 1.800 | Out Val MSE 32.7750
+[ITE Head] epoch  0 | Train MSE 8.0073 | Val MSE 1441.0347
+[ITE Head] epoch  1 | Train MSE 7.9912 | Val MSE 1441.4438
+[ITE Head] epoch  2 | Train MSE 7.9831 | Val MSE 1441.7055
+[ITE Head] epoch  3 | Train MSE 7.9890 | Val MSE 1442.1971
+[ITE Head] epoch  4 | Train MSE 7.9893 | Val MSE 1442.5050
+[ITE Head] epoch  5 | Train MSE 7.9747 | Val MSE 1442.9853
+[ITE Head] epoch  6 | Train MSE 7.9853 | Val MSE 1443.1278
+[ITE Head] epoch  7 | Train MSE 7.9741 | Val MSE 1443.4077
+[ITE Head] epoch  8 | Train MSE 7.9858 | Val MSE 1443.7728
+[ITE Head] epoch  9 | Train MSE 7.9847 | Val MSE 1443.7961
+[ITE Head] epoch 10 | Train MSE 7.9813 | Val MSE 1443.9772
+[ITE Head] epoch 11 | Train MSE 7.9689 | Val MSE 1443.7193
+[ITE Head] epoch 12 | Train MSE 7.9722 | Val MSE 1444.2686
+[ITE Head] epoch 13 | Train MSE 7.9746 | Val MSE 1444.3747
+[ITE Head] epoch 14 | Train MSE 7.9646 | Val MSE 1444.1641
+[ITE Head] epoch 15 | Train MSE 7.9717 | Val MSE 1444.5990
+ITE early stopping at epoch 15.

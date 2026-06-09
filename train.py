@@ -294,7 +294,7 @@ def evaluate_ite(val_dl, ite, device=DEVICE, eps=CLIPPING_EPS, trim=TRIM):
         n += eff.size(0)
     return mse_sum / n
 
-def train_ite(train_dl, val_dl, K, t0, device=DEVICE, epochs=EPOCHS) -> ITEHead:
+def train_ite(train_dl, val_dl, K, device=DEVICE, epochs=EPOCHS) -> ITEHead:
     """Train the ITE head on the DR targets."""
     ite = ITEHead(K).to(device)
     opt = torch.optim.Adam(ite.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
@@ -313,10 +313,10 @@ def train_ite(train_dl, val_dl, K, t0, device=DEVICE, epochs=EPOCHS) -> ITEHead:
 
             # Loss sum
             mse_sum += loss.item()
-            n_batches += 1
+            n_batches += eff.size(0)
 
         val_mse = evaluate_ite(val_dl, ite)
-        print(f"[ITE Head] epoch {epoch:2d} | Train MSE {mse_sum / n_batches:.4f} |Val Pseudo-MSE {val_mse:.4f}")
+        print(f"[ITE Head] epoch {epoch:2d} | Train MSE {mse_sum / n_batches:.4f} | Val MSE {val_mse:.4f}")
         if es.step(val_mse, {"ite": ite}):
             print(f"ITE early stopping at epoch {epoch:2d}.")
             break
@@ -331,24 +331,24 @@ def main():
     set_seed()
     data = data_preprocessing()
 
-    # # First Stage: Train Encoder + PropensityHead
-    # inp, enc, prop = train_representation(data)
-    # # Test the representation learning performance on the test set
-    # test_ce, test_acc = evaluate_propensity(inp, enc, prop, data.test_dl)
-    # print(f"[Representation Learning] Final Test CE: {test_ce:.3f} | Test Accuracy: {test_acc:.3f}")
-    # for p in enc.parameters(): p.requires_grad = False      # Freeze Encoder
+    # First Stage: Train Encoder + PropensityHead
+    inp, enc, prop = train_representation(data)
+    # Test the representation learning performance on the test set
+    test_ce, test_acc = evaluate_propensity(inp, enc, prop, data.test_dl)
+    print(f"[Representation Learning] Final Test CE: {test_ce:.3f} | Test Accuracy: {test_acc:.3f}")
+    for p in enc.parameters(): p.requires_grad = False      # Freeze Encoder
 
-    # # Second Stage: Train OutcomeModel
-    # out = train_outcome(data, inp, enc)
-    # test_mse = evaluate_outcome(inp, enc, out, data.test_dl)
-    # print(f"[Outcome Model] Final Test MSE: {test_mse:.4f}")
+    # Second Stage: Train OutcomeModel
+    out = train_outcome(data, inp, enc)
+    test_mse = evaluate_outcome(inp, enc, out, data.test_dl)
+    print(f"[Outcome Model] Final Test MSE: {test_mse:.4f}")
 
-    # TEST
-    inp = InputProcessing(data.num_dim, data.cat_dim).to(DEVICE)
-    enc = Encoder(inp.din).to(DEVICE)
-    prop = PropensityHead(data.K).to(DEVICE)
-    out = OutcomeModel(data.K).to(DEVICE)
-    # TEST
+    # # TEST
+    # inp = InputProcessing(data.num_dim, data.cat_dim).to(DEVICE)
+    # enc = Encoder(inp.din).to(DEVICE)
+    # prop = PropensityHead(data.K).to(DEVICE)
+    # out = OutcomeModel(data.K).to(DEVICE)
+    # # TEST
     
     # Third Stage: Train ITEHead
     n_prop_A, n_out_A = train_nuisances(data.train_dl_A, data.val_dl, inp, enc, data.K)
