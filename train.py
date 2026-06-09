@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import os
 import torch
 import torch.nn as nn
@@ -6,17 +7,19 @@ from torch.utils.data import DataLoader, Subset, TensorDataset
 from copy import deepcopy
 
 from dataset import Dataset, data_preprocessing
-from config import (BATCH_SIZE, set_seed, CLIPPING_EPS, TRIM, WINSORIZATION_QUANTILES, 
+from config import (BATCH_SIZE, MODEL_SAVE_PATH, set_seed, CLIPPING_EPS, TRIM, WINSORIZATION_QUANTILES, 
                     EPOCHS, LEARNING_RATE, PATIENCE, WEIGHT_DECAY, 
                     LAMBDA_STAB, LAMBDA_MMD, LAMBDA_AC)
-from model import (InputProcessing, Encoder, PropensityHead, OutcomeModel, 
+from model import (T_STEPS, InputProcessing, Encoder, PropensityHead, OutcomeModel, 
                    ITEHead, Denoiser, make_schedule, sample_C,
                    augment, MMD, anti_collapse)
 
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 DEVICE = torch.device("cpu")
 
+
 class EarlyStopping:
+    """Early stopping mechanism for training."""
     def __init__(self, patience):
         self.patience, self.best, self.counter, self.best_state = patience, float("inf"), 0, None
 
@@ -33,6 +36,7 @@ class EarlyStopping:
             m.load_state_dict(self.best_state[k])   # type: ignore
 
 
+######################## Propensity Head Evaluation ########################
 @torch.no_grad()
 def evaluate_propensity(inp, enc, prop, loader, device=DEVICE) -> tuple[float, float]: 
     """
@@ -53,6 +57,7 @@ def evaluate_propensity(inp, enc, prop, loader, device=DEVICE) -> tuple[float, f
     return ce_sum / n, correct / n
 
 
+######################## Representation Learning ########################
 def train_representation(data: Dataset, epochs=EPOCHS, patience=PATIENCE, device=DEVICE):
     """Train the representation (Encoder + PropensityHead) with stability/MMD/anti-collapse losses."""
 
@@ -66,7 +71,7 @@ def train_representation(data: Dataset, epochs=EPOCHS, patience=PATIENCE, device
     # Init Optimizer and Loss Functions
     p = [p for m in parts for p in m.parameters()]
     opt = torch.optim.Adam(p, lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
-    mse, ce = nn.MSELoss(), nn.CrossEntropyLoss()
+    mse, ce = nn.MSELoss(reduction="sum"), nn.CrossEntropyLoss()
     
     es = EarlyStopping(patience)
     mods = {"inp": inp, "enc": enc, "prop": prop}
@@ -116,22 +121,24 @@ def train_representation(data: Dataset, epochs=EPOCHS, patience=PATIENCE, device
             running["stab"] += loss_stab.item()
             running["mmd"] += loss_mmd.item()
             running["prop"] += loss_prop.item()
-            n_batches += 1
+            n_batches += x.size(0)
 
         # average losses for train/val
         avg = {k: v / n_batches for k, v in running.items()}
         val_ce, val_acc = evaluate_propensity(inp, enc, prop, data.val_dl)
 
-        print(f"[Representation Learning] epoch {epoch:2d} | CE {val_ce:.3f} | acc {val_acc:.3f} "
+        print(f"[Representation Learning] epoch {epoch+1:2d} | CE {val_ce:.3f} | acc {val_acc:.3f} "
               f"| stab {avg['stab']:.3f} | prop {avg['prop']:.3f} | MMD {avg['mmd']:.4f}") # type: ignore
         
         if es.step(val_ce, mods):  # Early stopping on val CE
-            print(f"Early stopping triggered at epoch {epoch:2d}")
+            print(f"Early stopping triggered at epoch {epoch+1:2d}")
             break
 
     es.restore(mods)
     return mods["inp"], mods["enc"], mods["prop"]
 
+
+######################### Outcome Model Training ########################
 @torch.no_grad()
 def evaluate_outcome(inp, enc, out, loader, device=DEVICE):
     """Evaluate the outcome prediction MSE on the val/test set."""
@@ -154,7 +161,7 @@ def train_outcome(data, inp, enc, epochs=EPOCHS, patience=PATIENCE, device=DEVIC
 
     # Init Optimizer and Loss Functions
     opt = torch.optim.Adam(out.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
-    mse = nn.MSELoss()
+    mse = nn.MSELoss(reduction="sum")
     
     es = EarlyStopping(patience); mods = {"out": out}
 
@@ -171,21 +178,22 @@ def train_outcome(data, inp, enc, epochs=EPOCHS, patience=PATIENCE, device=DEVIC
 
             # Loss sum
             mse_sum += loss.item()
-            n_batches += 1
+            n_batches += y_hat.shape[0]
 
         # average losses for train/val
         val_mse = evaluate_outcome(inp, enc, out, data.val_dl)
 
-        print(f"[Outcome Model] epoch {epoch:2d} | Train MSE {mse_sum / n_batches:.4f} | Val MSE {val_mse:.4f}")
+        print(f"[Outcome Model] epoch {epoch+1:2d} | Train MSE {mse_sum / n_batches:.4f} | Val MSE {val_mse:.4f}")
         
         if es.step(val_mse, mods):  # Early stopping on val MSE
-            print(f"Early stopping triggered at epoch {epoch:2d}")
+            print(f"Early stopping triggered at epoch {epoch+1:2d}")
             break
 
     es.restore(mods)
     return mods["out"]
 
 
+######################## ITE Estimation with Doubly-Robust Pseudo-Targets ########################
 @torch.no_grad()
 def _compute_dr_targets(inp, enc, prop, out, loader, K, device=DEVICE, eps=CLIPPING_EPS):
     """Frozen nuisances -> doubly-robust pseudo-OUTCOMES Y_dr (with propensity CLIPPING).
@@ -237,7 +245,7 @@ def train_nuisances(train_dl, val_dl, inp, enc, K, epochs=EPOCHS,
         val_mse   = evaluate_outcome(inp, enc, out, val_dl)
         stop_p = es_prop.step(val_ce, {"prop": prop})
         stop_o = es_out.step(val_mse, {"out": out})
-        print(f"[Nuisance Training] epoch {epoch:2d} | Prop Val CE {val_ce:.3f} | Out Val MSE {val_mse:.4f}")
+        print(f"[Nuisance Training] epoch {epoch+1:2d} | Prop Val CE {val_ce:.3f} | Out Val MSE {val_mse:.4f}")
         if stop_p and stop_o: 
             break
 
@@ -298,7 +306,7 @@ def train_ite(train_dl, val_dl, K, device=DEVICE, epochs=EPOCHS) -> ITEHead:
     """Train the ITE head on the DR targets."""
     ite = ITEHead(K).to(device)
     opt = torch.optim.Adam(ite.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
-    mse = nn.MSELoss()
+    mse = nn.MSELoss(reduction="sum")
     es  = EarlyStopping(PATIENCE)
 
     for epoch in range(epochs):
@@ -316,39 +324,100 @@ def train_ite(train_dl, val_dl, K, device=DEVICE, epochs=EPOCHS) -> ITEHead:
             n_batches += eff.size(0)
 
         val_mse = evaluate_ite(val_dl, ite)
-        print(f"[ITE Head] epoch {epoch:2d} | Train MSE {mse_sum / n_batches:.4f} | Val MSE {val_mse:.4f}")
+        print(f"[ITE Head] epoch {epoch+1:2d} | Train MSE {mse_sum / n_batches:.4f} | Val MSE {val_mse:.4f}")
         if es.step(val_mse, {"ite": ite}):
-            print(f"ITE early stopping at epoch {epoch:2d}.")
+            print(f"ITE early stopping at epoch {epoch+1:2d}.")
             break
     es.restore({"ite": ite})
     return ite
 
+######################## Diffusion Model Training ########################
+@torch.no_grad()
+def evaluate_diffusion(inp, enc, denoiser, loader, schedule, device=DEVICE, seed=set_seed()):
+    """Denoising MSE on val/test (per-element, same scale as the train log).
+       Steps & noise are seeded so the metric is comparable across epochs."""
+    for m in (inp, enc, denoiser): m.eval()
+    _, _, alpha_bars = schedule
+    T = len(alpha_bars)
+    g = torch.Generator(device=device).manual_seed(seed)
+    mse = nn.MSELoss(reduction="sum")
+    n_elem, se = 0, 0.0
+    for num, cat, t, _ in loader:
+        num, cat, t = num.to(device), cat.to(device), t.to(device)
+        S, C = enc(inp(num, cat))                              # clean C, no aug
+        step = torch.randint(0, T, (C.shape[0],), device=device, generator=g)
+        eps  = torch.randn(C.shape, device=device, generator=g)
+        ab   = alpha_bars[step].unsqueeze(1)                   # (B, 1)
+        C_t  = torch.sqrt(ab) * C + torch.sqrt(1 - ab) * eps   # forward diffusion
+        eps_hat = denoiser(C_t, step, S, t)
+        se += mse(eps_hat, eps).item(); n_elem += eps.numel()
+    return se / n_elem
 
-def main():
 
+def train_denoiser(data, inp, enc, epochs=EPOCHS, patience=PATIENCE, 
+                    device=DEVICE, T=T_STEPS) -> Denoiser:
+    """Forth Stage - conditional diffusion in the confounding space.
+       Standard DDPM eps-prediction: noise the clean C from the (frozen) encoder,
+       condition the denoiser on (step, S, treatment t), regress the added noise."""
+    K = data.K
+    denoiser = Denoiser(K).to(device)
+    schedule = make_schedule(T)
+    alpha_bars = schedule[2].to(device)
+
+    opt = torch.optim.Adam(denoiser.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
+    mse = nn.MSELoss(reduction="sum")
+    es  = EarlyStopping(patience); mods = {"denoiser": denoiser}
+
+    for epoch in range(epochs):
+        inp.eval(); enc.eval(); denoiser.train()
+        mse_sum, n_batches = 0.0, 0
+        for z in data.train_dl:
+            num, cat, t, _ = (b.to(device) for b in z)
+            with torch.no_grad(): S, C = enc(inp(num, cat))     # clean C
+
+            step = torch.randint(0, T, (C.shape[0],), device=device)
+            ab   = alpha_bars[step].unsqueeze(1)
+
+            eps  = torch.randn_like(C)                          # Create random noise
+            C_t  = torch.sqrt(ab) * C + torch.sqrt(1 - ab) * eps
+            eps_hat = denoiser(C_t, step, S, t)                    # predict the added noise
+            
+            loss = mse(eps_hat, eps)                                 
+            opt.zero_grad(); loss.backward(); opt.step()
+            mse_sum += loss.item(); n_batches += C.shape[0]
+
+        val_mse = evaluate_diffusion(inp, enc, denoiser, data.val_dl, schedule)
+        print(f"[Diffusion] epoch {epoch+1:2d} | Train MSE {mse_sum / n_batches:.4f} | Val MSE {val_mse:.4f}")
+        if es.step(val_mse, mods):
+            print(f"Diffusion early stopping at epoch {epoch+1:2d}.")
+            break
+
+    es.restore(mods)
+    return mods["denoiser"]
+
+@dataclass
+class Models:
+    inp: torch.nn.Module
+    enc: torch.nn.Module
+    prop: torch.nn.Module
+    out: torch.nn.Module
+    ite: torch.nn.Module
+    denoiser: torch.nn.Module
+
+def train_all(data, path = MODEL_SAVE_PATH, seed=set_seed()) -> Models:
+    
     # Init 
     os.makedirs("models", exist_ok=True)
-    set_seed()
-    data = data_preprocessing()
+    set_seed(seed)
 
     # First Stage: Train Encoder + PropensityHead
     inp, enc, prop = train_representation(data)
     # Test the representation learning performance on the test set
-    test_ce, test_acc = evaluate_propensity(inp, enc, prop, data.test_dl)
-    print(f"[Representation Learning] Final Test CE: {test_ce:.3f} | Test Accuracy: {test_acc:.3f}")
     for p in enc.parameters(): p.requires_grad = False      # Freeze Encoder
 
     # Second Stage: Train OutcomeModel
     out = train_outcome(data, inp, enc)
-    test_mse = evaluate_outcome(inp, enc, out, data.test_dl)
-    print(f"[Outcome Model] Final Test MSE: {test_mse:.4f}")
 
-    # # TEST
-    # inp = InputProcessing(data.num_dim, data.cat_dim).to(DEVICE)
-    # enc = Encoder(inp.din).to(DEVICE)
-    # prop = PropensityHead(data.K).to(DEVICE)
-    # out = OutcomeModel(data.K).to(DEVICE)
-    # # TEST
     
     # Third Stage: Train ITEHead
     n_prop_A, n_out_A = train_nuisances(data.train_dl_A, data.val_dl, inp, enc, data.K)
@@ -358,11 +427,73 @@ def main():
                                  data.K, data.params["t0"], shuffle=True)
     val_data    = build_ite_data([data.val_dl], inp, enc, [prop], [out], data.K, 
                                  data.params["t0"], shuffle=False)
-    ITE_head = train_ite(train_data, val_data, data.K, data.params["t0"])
+    ite = train_ite(train_data, val_data, data.K)
 
     # Forth Stage: Train Diffusion Model
+    denoiser = train_denoiser(data, inp, enc)
 
-    # Fifth Stage: 
+    # Save the trained models
+    torch.save(inp.state_dict(),     os.path.join(path, "inp.pt"))
+    torch.save(enc.state_dict(),     os.path.join(path, "enc.pt"))
+    torch.save(prop.state_dict(),    os.path.join(path, "prop.pt"))
+    torch.save(out.state_dict(),     os.path.join(path, "out.pt"))
+    torch.save(ite.state_dict(),     os.path.join(path, "ite.pt"))
+    torch.save(denoiser.state_dict(),os.path.join(path, "denoiser.pt"))
+
+    return Models(
+        inp=inp,
+        enc=enc,
+        prop=prop,
+        out=out,
+        ite=ite,
+        denoiser=denoiser,
+    )
+
+
+def main():
+
+    # Init 
+    os.makedirs("models", exist_ok=True)
+    set_seed()
+    data = data_preprocessing()
+
+    # # First Stage: Train Encoder + PropensityHead
+    # inp, enc, prop = train_representation(data)
+    # # Test the representation learning performance on the test set
+    # test_ce, test_acc = evaluate_propensity(inp, enc, prop, data.test_dl)
+    # print(f"[Representation Learning] Final Test CE: {test_ce:.3f} | Test Accuracy: {test_acc:.3f}")
+    # for p in enc.parameters(): p.requires_grad = False      # Freeze Encoder
+
+    # # Second Stage: Train OutcomeModel
+    # out = train_outcome(data, inp, enc)
+    # test_mse = evaluate_outcome(inp, enc, out, data.test_dl)
+    # print(f"[Outcome Model] Final Test MSE: {test_mse:.4f}")
+
+    
+    # Third Stage: Train ITEHead
+    # n_prop_A, n_out_A = train_nuisances(data.train_dl_A, data.val_dl, inp, enc, data.K)
+    # n_prop_B, n_out_B = train_nuisances(data.train_dl_B, data.val_dl, inp, enc, data.K)
+    # train_data  = build_ite_data([data.train_dl_B, data.train_dl_A], inp, enc, 
+    #                              [n_prop_A, n_prop_B], [n_out_A, n_out_B], 
+    #                              data.K, data.params["t0"], shuffle=True)
+    # val_data    = build_ite_data([data.val_dl], inp, enc, [prop], [out], data.K, 
+    #                              data.params["t0"], shuffle=False)
+    # ite = train_ite(train_data, val_data, data.K)
+    
+    # TEST
+    inp = InputProcessing(data.num_dim, data.cat_dim).to(DEVICE)
+    enc = Encoder(inp.din).to(DEVICE)
+    prop = PropensityHead(data.K).to(DEVICE)
+    out = OutcomeModel(data.K).to(DEVICE)
+    # TEST
+
+    # Forth Stage: Train Diffusion Model
+    denoiser = train_denoiser(data, inp, enc)
+
+    # test_ce, test_acc = evaluate_propensity(inp, enc, prop, data.test_dl)
+    # print(f"[Representation Learning] Final Test CE: {test_ce:.3f} | Test Accuracy: {test_acc:.3f}")
+    # test_mse = evaluate_outcome(inp, enc, out, data.test_dl)
+    # print(f"[Outcome Model] Final Test MSE: {test_mse:.4f}")
 
 
 if __name__ == "__main__":

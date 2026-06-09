@@ -18,8 +18,8 @@ LAMBDA_MMD = 1.0
 LAMBDA_AC = 0.1
 
 # Configurations and Hyperparameters
-SEED        = 42
-EPOCHS      = 100
+SEED: int   = 42
+EPOCHS: int = 100
 BATCH_SIZE  = 32
 PATIENCE    = 15
 
@@ -39,3 +39,4 @@ def set_seed(seed=SEED):
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
+    return seed

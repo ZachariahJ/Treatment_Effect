@@ -102,8 +102,8 @@ class ITEHead(nn.Module):
 
 class Denoiser(nn.Module):
     """
-    eps_theta(C_t, step, S, t): given the noised C, the step index, and conditions (S, treatment), predict the noise that was added. 
-    Output has the same shape as C.
+    Denoiser(C_t, step, S, t) -> eps_hat
+    Predict the noise that was added. 
     """
     def __init__(self, K: int, T: int = T_STEPS):
         super().__init__()
@@ -192,10 +192,10 @@ def make_schedule(T=T_STEPS):
 @torch.no_grad()
 def sample_C(denoiser, S, t, schedule):
     """
-    S: (B,S_DIM), t: (B,) -> C_cf: (B,C_DIM).
+    sample_C(denoiser, S, t, schedule) -> C_cf
     Reverse diffusion (DDPM ancestral sampling): 
     generate a counterfactual C from pure noise,
-    conditioned on (S, treatment t). 
+    conditioned on (S, t). 
     """
     betas, alphas, alpha_bars = schedule
     T = len(betas)                                          # number of diffusion steps
