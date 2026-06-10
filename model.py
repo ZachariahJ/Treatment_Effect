@@ -50,7 +50,7 @@ class PropensityHead(nn.Module):
     """
     Output: Logits over K
     
-    1 Layer MLP (64) + BatchNorm + ReLU + dropout 0.1
+    1 Layer MLP (64) + ReLU
     """
     def __init__(self, K: int):
         super().__init__()
