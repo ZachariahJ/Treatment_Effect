@@ -122,14 +122,14 @@ class Denoiser(nn.Module):
         return self.net(h)
 
 
-def augment(x, noise_std=NOISE_STD, drop_p=DROP_P):
+def augment(x, noise_std=NOISE_STD, drop_p=DROP_P, invert_dropout=True):
     """
     Data augmentation for stable representation learning
     Guassian Noise + Feature Dropout
     """
     gauss = torch.randn_like(x) * noise_std
     mask = (torch.rand_like(x) > drop_p).float()
-    return (x + gauss) * mask
+    return (x + gauss) * mask / (1 - drop_p*invert_dropout)        # inverted dropout
 
 
 def anti_collapse(z1, z2, gamma=1.0, eps=1e-4):

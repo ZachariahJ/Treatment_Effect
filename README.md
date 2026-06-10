@@ -93,3 +93,20 @@ DDPM $\varepsilon$-prediction over frozen $C$, conditioned on step $s$, $S$, and
 $$
 \mathcal{L}_{\text{diff}} = \mathrm{MSE}\bigl(\hat{\varepsilon_\theta}, \varepsilon\bigr)
 $$
+
+# Ablation Study
+
+### Upgrade Optimizer
+- **Change:**  Upgrade Optimizer from `Adam` to `AdamW`
+- **Effect:**  Factual RMSE `0.9935 (Baseline)` -> `0.9951 (+0.0016)`
+- **Notes:**   Due to the irregularity of the provided dataset, no significant change was observed.
+
+### Inverted Dropout
+- **Change:**  Integrated inverted dropout when augmenting x
+- **Effect:**  Factual RMSE `0.9935` -> `0.9928 (-0.0007)`
+- **Notes:**   Due to the irregularity of the provided dataset, no significant change was observed. 
+
+### Weight Decay
+- **Change:**  Increased Optimizer Weight Decay `1e-5` -> `1e-4` -> `1e-3` -> `1e-2`
+- **Effect:**  Factual RMSE `0.9935 (Baseline)` -> `0.9929 (-0.0007)` -> `0.9861 (-0.0068)` -> `0.9858 (-0.0003)`
+- **Notes:**   Due to the irregularity of the provided dataset, no significant change was observed. However, the trend was showing a decrease in the MSE loss.

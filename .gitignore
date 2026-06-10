@@ -6,8 +6,8 @@ __pycache__/
 
 .vscode/
 test.py
-out
 models/
+outputs
 
 # C extensions
 *.so

@@ -186,7 +186,7 @@ def train_representation(data: Dataset, epochs=EPOCHS, patience=PATIENCE, device
 
     # Init Optimizer and Loss Functions
     p = [p for m in parts for p in m.parameters()]
-    opt = torch.optim.Adam(p, lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
+    opt = torch.optim.AdamW(p, lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
     mse, ce = nn.MSELoss(), nn.CrossEntropyLoss()
     
     es = EarlyStopping(patience)
@@ -201,8 +201,8 @@ def train_representation(data: Dataset, epochs=EPOCHS, patience=PATIENCE, device
             x = inp(num, cat)                               # Input vector (B, din)
 
             # two augmented views of same input
-            S1, C1 = enc(augment(x))
-            S2, C2 = enc(augment(x))
+            S1, C1 = enc(augment(x, invert_dropout=False))
+            S2, C2 = enc(augment(x, invert_dropout=False))
 
             # Loss 1: Stability Loss
             # i) "stability of the stable representation across the two views"
@@ -262,7 +262,7 @@ def train_outcome(data, inp, enc, epochs=EPOCHS, patience=PATIENCE, device=DEVIC
     out  = OutcomeModel(K).to(device)
 
     # Init Optimizer and Loss Functions
-    opt = torch.optim.Adam(out.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
+    opt = torch.optim.AdamW(out.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
     mse = nn.MSELoss()
     
     es = EarlyStopping(patience); mods = {"out": out}
@@ -307,7 +307,7 @@ def train_nuisances(train_dl, val_dl, inp, enc, K, epochs=EPOCHS,
     out  = OutcomeModel(K).to(device)
 
     p = [p for m in [prop, out] for p in m.parameters()]
-    opt = torch.optim.Adam(p, lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
+    opt = torch.optim.AdamW(p, lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
     
     ce, mse = nn.CrossEntropyLoss(), nn.MSELoss()
     es_prop, es_out = EarlyStopping(patience), EarlyStopping(patience)
@@ -337,7 +337,7 @@ def train_nuisances(train_dl, val_dl, inp, enc, K, epochs=EPOCHS,
 def train_ite(train_dl, val_dl, K, device=DEVICE, epochs=EPOCHS) -> ITEHead:
     """Train the ITE head on the DR targets."""
     ite = ITEHead(K).to(device)
-    opt = torch.optim.Adam(ite.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
+    opt = torch.optim.AdamW(ite.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
     mse = nn.MSELoss()
     es  = EarlyStopping(PATIENCE)
 
@@ -374,7 +374,7 @@ def train_denoiser(data, inp, enc, epochs=EPOCHS, patience=PATIENCE,
     schedule = make_schedule(T)
     alpha_bars = schedule[2].to(device)
 
-    opt = torch.optim.Adam(denoiser.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
+    opt = torch.optim.AdamW(denoiser.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
     mse = nn.MSELoss()
     es  = EarlyStopping(patience); mods = {"denoiser": denoiser}
 
